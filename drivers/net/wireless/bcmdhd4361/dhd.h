@@ -493,7 +493,8 @@ enum {
 #else
 #ifdef BCMSDIO
 #define TCPACK_SUP_DEFAULT	TCPACK_SUP_DELAYTX
-#elif defined(BCMPCIE)#define TCPACK_SUP_DEFAULT	TCPACK_SUP_OFF
+#elif defined(BCMPCIE)
+#define TCPACK_SUP_DEFAULT	TCPACK_SUP_OFF
 #endif /* BCMSDIO */
 #endif /* ARGOS_CPU_SCHEDULER */
 #endif /* DHDTCPACK_SUPPRESS */

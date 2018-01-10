@@ -85,6 +85,20 @@
 #endif
 
 	stp	x0, x1, [sp, #16 * 0]
+#if 1
+	/*
+	 * This is workaround code to stop infinite exception problem:
+	 * Check low bits of sp if sp is too low enough to reach the bottom of stack area
+	 * If it is under stack bottom + 0x200, loop forever and wait for watchdog reset
+	 */
+	mov	x0, sp
+	and	x0, x0, #(THREAD_SIZE - 1)
+	cmp	x0, #0x200 // 0x200 - 0x120 is rough estimation of stack safety area (including thread_info)
+	b.ge	1f
+	b	.
+1:
+	ldr	x0, [sp]
+#endif
 	stp	x2, x3, [sp, #16 * 1]
 	stp	x4, x5, [sp, #16 * 2]
 	stp	x6, x7, [sp, #16 * 3]
@@ -331,6 +345,7 @@ el1_sync:
 	cmp	x24, #ESR_ELx_EC_BREAKPT_CUR	// debug exception in EL1
 	b.ge	el1_dbg
 	b	el1_inv
+
 el1_da:
 	/*
 	 * Data abort handling

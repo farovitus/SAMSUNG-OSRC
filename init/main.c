@@ -169,6 +169,8 @@ EXPORT_SYMBOL_GPL(static_key_initialized);
 unsigned int reset_devices;
 EXPORT_SYMBOL(reset_devices);
 
+int ddr_start_type = 0;
+
 static int __init set_reset_devices(char *str)
 {
 	reset_devices = 1;
@@ -590,6 +592,8 @@ static void rkp_init(void)
 	init._srodata = (u64) __start_rodata;
 	init._erodata =(u64) __end_rodata;
 	init.large_memory = rkp_support_large_memory;
+	init.fimc_phys_addr = (u64)page_to_phys(vmalloc_to_page((void *)FIMC_LIB_START_VA));
+	init.fimc_size = FIMC_LIB_SIZE;
 
 	rkp_call(RKP_INIT, (u64)&init, 0, 0, 0, 0);
 	rkp_started = 1;
@@ -696,6 +700,9 @@ asmlinkage __visible void __init start_kernel(void)
 #ifdef CONFIG_TIMA_RKP
 	vmm_init();
 	rkp_init();
+#if !defined(CONFIG_USE_SIGNED_BINARY) && !defined(CONFIG_SAMSUNG_PRODUCT_SHIP)
+	rkp_call(RKP_NOSHIP_BIN, 0, 0, 0, 0, 0);
+#endif
 #ifdef CONFIG_TIMA_RKP_DEBUG
 	rkp_call(RKP_DEBUG, 0, 0, 0, 0, 0);
 #endif

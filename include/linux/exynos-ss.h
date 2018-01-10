@@ -159,12 +159,6 @@ extern int exynos_ss_hook_pmsg(char *buffer, size_t count);
 #define exynos_ss_hook_pmsg(a,b)	do { } while(0)
 #endif
 
-#ifdef CONFIG_EXYNOS_SNAPSHOT_CRASH_KEY
-void exynos_ss_check_crash_key(unsigned int code, int value);
-#else
-#define exynos_ss_check_crash_key(a,b)	do { } while(0);
-#endif
-
 #ifdef CONFIG_EXYNOS_SNAPSHOT_SFRDUMP
 void exynos_ss_dump_sfr(void);
 #else

@@ -248,9 +248,15 @@ extern void sec_debug_avc_log(char *fmt, ...);
 #ifdef CONFIG_SEC_DEBUG_TSP_LOG
 extern void sec_debug_tsp_log(char *fmt, ...);
 extern void sec_debug_tsp_log_msg(char *msg, char *fmt, ...);
+extern void sec_debug_tsp_raw_data(char *fmt, ...);
+extern void sec_debug_tsp_raw_data_msg(char *msg, char *fmt, ...);
+extern void sec_tsp_raw_data_clear(void);
 #else
-#define sec_debug_tsp_log(a, ...)		do { } while (0)
+#define sec_debug_tsp_log(a, ...)			do { } while (0)
 #define sec_debug_tsp_log_msg(a, b, ...)		do { } while (0)
+#define sec_debug_tsp_raw_data(a, ...)			do { } while (0)
+#define sec_debug_tsp_raw_data_msg(a, b, ...)		do { } while (0)
+#define sec_tsp_raw_data_clear()			do { } while (0)
 #endif /* CONFIG_SEC_DEBUG_TSP_LOG */
 
 #ifdef CONFIG_TOUCHSCREEN_DUMP_MODE

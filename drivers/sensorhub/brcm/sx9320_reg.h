@@ -147,6 +147,10 @@ enum registers1 {
 #define SX9320_AVGTHRESH	"sx9320,avgthresh"
 #define SX9320_DEBOUNCER	"sx9320,debouncer"
 #define SX9320_NORMALTHD	"sx9320,normal_thd"
+#define SX9320_AFEPH0		"sx9320,afeph0"
+#define SX9320_AFEPH1		"sx9320,afeph1"
+#define SX9320_AFEPH2		"sx9320,afeph2"
+#define SX9320_AFEPH3		"sx9320,afeph3"
 
 #define SX9320_CS2_GND
 //#define SX9320_CS0_GND

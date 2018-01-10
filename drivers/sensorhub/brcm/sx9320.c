@@ -109,6 +109,10 @@ struct sx9320_p {
 	u8 avgnegfilt;
 	u8 avgthresh;
 	u8 debouncer;
+	u8 afeph0;
+	u8 afeph1;
+	u8 afeph2;
+	u8 afeph3;
 	int irq;
 	int gpio_nirq;
 	int state;
@@ -222,21 +226,20 @@ static int sx9320_i2c_read(struct sx9320_p *data, u8 reg_addr, u8 *buf)
 
 static void sx9320_get_again(struct sx9320_p *data)
 {
-
 	switch (data->again) {
-	case 0x06 : 
+	case 0x06:
 		data->again_ch = 1247;
 		break;
-	case 0x08 :
+	case 0x08:
 		data->again_ch = 1000;
 		break;
-	case 0x0B :
+	case 0x0B:
 		data->again_ch = 768;
 		break;
-	case 0x0F :
+	case 0x0F:
 		data->again_ch = 552;
 		break;
-	default :
+	default:
 		data->again_ch = 1000;
 	}
 }
@@ -308,8 +311,10 @@ static void sx9320_send_event(struct sx9320_p *data, u8 state)
 		pr_info("[SX9320]: %s - button released\n", __func__);
 	}
 
-	if (data->skip_data == true)
+	if (data->skip_data == true) {
+		pr_info("[SX9320]: %s - skip grip event\n", __func__);
 		return;
+	}
 
 	if (state == ACTIVE)
 		input_report_rel(data->input, REL_MISC, 1);
@@ -1039,7 +1044,7 @@ static ssize_t sx9320_again_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	struct sx9320_p *data = dev_get_drvdata(dev);
-	
+
 	switch (data->again_ch) {
 	case 1247:
 		return snprintf(buf, PAGE_SIZE, "x1.247\n");
@@ -1083,7 +1088,7 @@ static ssize_t sx9320_irq_count_show(struct device *dev,
 
 	int result = 0;
 
-	if(data->irq_count)
+	if (data->irq_count)
 		result = -1;
 
 	pr_info("[SX9320]: %s - called\n", __func__);
@@ -1108,7 +1113,7 @@ static ssize_t sx9320_irq_count_store(struct device *dev,
 
 	mutex_lock(&data->read_mutex);
 
-	if(onoff == 0) {
+	if (onoff == 0) {
 		data->abnormal_mode = OFF;
 	} else if (onoff == 1) {
 		data->abnormal_mode = ON;
@@ -1121,7 +1126,7 @@ static ssize_t sx9320_irq_count_store(struct device *dev,
 	mutex_unlock(&data->read_mutex);
 
 	pr_info("[SX9320]: %s - %d\n", __func__, onoff);
-	
+
 	return count;
 }
 
@@ -1285,14 +1290,14 @@ static void sx9320_touch_process(struct sx9320_p *data, u8 flag)
 
 	sx9320_get_data(data);
 
-	if(data->abnormal_mode) {
+	if (data->abnormal_mode) {
 		if (status) {
 			if (data->max_diff < data->diff)
 				data->max_diff = data->diff;
 			data->irq_count++;
 		}
 	}
-	
+
 	sx9320_read_ch_interrupt(data, status);
 
 	if (data->state == IDLE) {
@@ -1512,11 +1517,15 @@ static void sx9320_initialize_variable(struct sx9320_p *data)
 	sx9320_set_specific_register(16, 5, 3, data->avgnegfilt);
 	sx9320_set_specific_register(17, 3, 2, data->debouncer);
 	sx9320_set_specific_register(17, 5, 4, data->hyst);
+	sx9320_set_specific_register(8, 5, 0, data->afeph0);
+	sx9320_set_specific_register(9, 5, 0, data->afeph1);
+	sx9320_set_specific_register(10, 5, 0, data->afeph2);
+	sx9320_set_specific_register(11, 5, 0, data->afeph3);
 
 	sx9320_get_again(data);
 }
 
-static void sx9320_read_setupreg(struct device_node *dnode, char *str, u8 *val)
+static int sx9320_read_setupreg(struct device_node *dnode, char *str, u8 *val)
 {
 	u32 temp_val;
 	int ret;
@@ -1528,6 +1537,8 @@ static void sx9320_read_setupreg(struct device_node *dnode, char *str, u8 *val)
 	else
 		pr_err("[SX9320]: %s - %s: property read err 0x%2x (%d)\n",
 			__func__, str, temp_val, ret);
+
+	return ret;
 }
 
 static int sx9320_parse_dt(struct sx9320_p *data, struct device *dev)
@@ -1559,6 +1570,18 @@ static int sx9320_parse_dt(struct sx9320_p *data, struct device *dev)
 	sx9320_read_setupreg(node, SX9320_AVGTHRESH, &data->avgthresh);
 	sx9320_read_setupreg(node, SX9320_DEBOUNCER, &data->debouncer);
 	sx9320_read_setupreg(node, SX9320_NORMALTHD, &data->normal_th);
+
+	if (sx9320_read_setupreg(node, SX9320_AFEPH0, &data->afeph0))
+		data->afeph0 = setup_reg[8].val;
+	if (sx9320_read_setupreg(node, SX9320_AFEPH1, &data->afeph1))
+		data->afeph1 = setup_reg[9].val;
+	if (sx9320_read_setupreg(node, SX9320_AFEPH2, &data->afeph2))
+		data->afeph2 = setup_reg[10].val;
+	if (sx9320_read_setupreg(node, SX9320_AFEPH3, &data->afeph3))
+		data->afeph3 = setup_reg[11].val;
+
+	pr_info("[SX9320]: afeph0:%x, afeph1:%x, afeph2:%x, afeph3:%x\n",
+		data->afeph0, data->afeph1, data->afeph2, data->afeph3);
 
 	return 0;
 }

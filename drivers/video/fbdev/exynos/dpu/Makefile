@@ -17,3 +17,4 @@ obj-$(CONFIG_EXYNOS_DECON_8895) += decon.o
 obj-$(CONFIG_DECON_EVENT_LOG) += event_log.o
 obj-$(CONFIG_SUPPORT_DSU) += dsu_update.o
 decon-y += decon_core.o decon_dsi.o decon_displayport.o decon_wb.o helper.o win_update.o bts.o
+obj-y += dp_logger/

@@ -673,6 +673,14 @@ static int panel_do_tx_packet(struct panel_device *panel, struct pktinfo *info)
 				return -EINVAL;
 			}
 			break;
+		case DSI_PKT_TYPE_WR_MEM:
+			ret = mipi_ops->write(id, MIPI_DSI_WR_MEM, info->data, info->dlen);
+			if (ret != info->dlen) {
+				panel_err("%s, failed to send packet %s (ret %d)\n",
+						__func__, info->name, ret);
+				return -EINVAL;
+			}
+			break;
 		case DSI_PKT_TYPE_WR:
 #ifdef DEBUG_PANEL
 			panel_dbg("%s, send packet %s - start\n", __func__, info->name);

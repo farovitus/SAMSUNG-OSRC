@@ -22,6 +22,7 @@ pms_info pms_parameters[] = {    /*  P     M     S   Divide */
 	/* PIXEL_CLOCK_108_000 */ {0x0D, 0x1B0, 0x03, 0x01},
 	/* PIXEL_CLOCK_138_500 */ {0x0D, 0x22A, 0x03, 0x01},
 	/* PIXEL_CLOCK_148_500 */ {0x0D, 0x252, 0x03, 0x01},
+	/* PIXEL_CLOCK_209_500 */ {0x0D, 0x1A3, 0x02, 0x01},
 	/* PIXEL_CLOCK_234_000 */ {0x07, 0x0FC, 0x02, 0x01},
 	/* PIXEL_CLOCK_241_500 */ {0x0D, 0x1E3, 0x02, 0x01},
 	/* PIXEL_CLOCK_297_000 */ {0x0D, 0x252, 0x02, 0x01},
@@ -41,9 +42,9 @@ videoformat_info videoformat_parameters[] = {
 	{v640x480p_60Hz,       800,  640, 10,  2, 33,  525,  480,   16,  96,  48, 60, PIXEL_CLOCK_25_200,    1, SYNC_NEGATIVE, SYNC_NEGATIVE},
 	{v720x480p_60Hz,       858,  720,  9,  6, 30,  525,  480,   16,  62,  60, 59, PIXEL_CLOCK_27_027,    2, SYNC_NEGATIVE, SYNC_NEGATIVE},
 	{v720x576p_50Hz,       864,  720,  5,  5, 39,  625,  576,   12,  64,  68, 50, PIXEL_CLOCK_27_000,   17, SYNC_NEGATIVE, SYNC_NEGATIVE},
-	{v1280x720p_50Hz,     1980, 1280,  5,  5, 20,  750,  720,  440,  40, 220, 50, PIXEL_CLOCK_74_250,   19, SYNC_POSITIVE, SYNC_POSITIVE},
-	{v1280x720p_60Hz,     1650, 1280,  5,  5, 20,  750,  720,  110,  40, 220, 60, PIXEL_CLOCK_74_250,    4, SYNC_POSITIVE, SYNC_POSITIVE},
 	{v1280x800p_RB_60Hz,  1440, 1280,  3,  6, 14,  823,  800,   48,  32,  80, 60, PIXEL_CLOCK_71_000,    0, SYNC_NEGATIVE, SYNC_POSITIVE},
+	{v1280x720p_50Hz,     1980, 1280,  5,  5, 20,  750,  720,  440,  40, 220, 50, PIXEL_CLOCK_74_250,   19, SYNC_POSITIVE, SYNC_POSITIVE},
+	{v1280x720p_60Hz,     1650, 1280,  5,  5, 20,  750,  720,  110,  40, 220, 60, PIXEL_CLOCK_74_250,    4, SYNC_POSITIVE, SYNC_POSITIVE},	
 	{v1280x1024p_60Hz,    1688, 1280,  1,  3, 38, 1066, 1024,   48, 112, 248, 60, PIXEL_CLOCK_108_000,   4, SYNC_POSITIVE, SYNC_POSITIVE},
 	{v1920x1080p_24Hz,    2750, 1920,  4,  5, 36, 1125, 1080,  638,  44, 148, 24, PIXEL_CLOCK_74_250,   32, SYNC_POSITIVE, SYNC_POSITIVE},
 	{v1920x1080p_25Hz,    2640, 1920,  4,  5, 36, 1125, 1080,  528,  44, 148, 25, PIXEL_CLOCK_74_250,   33, SYNC_POSITIVE, SYNC_POSITIVE},
@@ -51,6 +52,7 @@ videoformat_info videoformat_parameters[] = {
 	{v1920x1080p_59Hz,    2080, 1920,  3,  5, 23, 1111, 1080,   48,  44,  68, 59, PIXEL_CLOCK_138_500,   0, SYNC_POSITIVE, SYNC_POSITIVE},
 	{v1920x1080p_50Hz,    2640, 1920,  4,  5, 36, 1125, 1080,  528,  44, 148, 50, PIXEL_CLOCK_148_500,  31, SYNC_POSITIVE, SYNC_POSITIVE},
 	{v1920x1080p_60Hz,    2200, 1920,  4,  5, 36, 1125, 1080,   88,  44, 148, 60, PIXEL_CLOCK_148_500,  16, SYNC_POSITIVE, SYNC_POSITIVE},
+	{v2048x1536p_60Hz,    2208, 2048,  3,  4, 37, 1580, 1536,   48,  32,  80, 60, PIXEL_CLOCK_209_500,   0, SYNC_NEGATIVE, SYNC_POSITIVE},
 	{v1920x1440p_60Hz,    2600, 1920,  1,  3, 56, 1500, 1440,  128, 208, 344, 60, PIXEL_CLOCK_234_000,  16, SYNC_POSITIVE, SYNC_POSITIVE},
 	{v2560x1440p_59Hz,    2720, 2560,  3,  5, 33, 1481, 1440,   48,  32,  80, 59, PIXEL_CLOCK_241_500,   0, SYNC_POSITIVE, SYNC_POSITIVE},
 	{v2560x1440p_60Hz,    3488, 2560,  3,  5, 45, 1493, 1440,  192, 272, 464, 60, PIXEL_CLOCK_312_000,   0, SYNC_POSITIVE, SYNC_POSITIVE},
@@ -960,6 +962,13 @@ int displayport_reg_dpcd_write(u32 address, u32 length, u8 *data)
 		retry_cnt--;
 	}
 
+#ifdef CONFIG_SEC_DISPLAYPORT_BIGDATA
+	if (ret == 0)
+		secdp_bigdata_clr_error_cnt(ERR_AUX);
+	else
+		secdp_bigdata_inc_error_cnt(ERR_AUX);
+#endif
+
 	mutex_unlock(&displayport->aux_lock);
 
 	return ret;
@@ -990,6 +999,12 @@ int displayport_reg_dpcd_read(u32 address, u32 length, u8 *data)
 	if (ret == 0)
 		displayport_reg_aux_ch_received_buf(data, length);
 
+#ifdef CONFIG_SEC_DISPLAYPORT_BIGDATA
+	if (ret == 0)
+		secdp_bigdata_clr_error_cnt(ERR_AUX);
+	else
+		secdp_bigdata_inc_error_cnt(ERR_AUX);
+#endif
 	mutex_unlock(&displayport->aux_lock);
 
 	return ret;
@@ -1175,6 +1190,13 @@ int displayport_reg_edid_read(u8 edid_addr_offset, u32 length, u8 *data)
 		retry_cnt--;
 	}
 
+#ifdef CONFIG_SEC_DISPLAYPORT_BIGDATA
+	if (ret == 0)
+		secdp_bigdata_clr_error_cnt(ERR_AUX);
+	else
+		secdp_bigdata_inc_error_cnt(ERR_AUX);
+#endif
+
 	mutex_unlock(&displayport->aux_lock);
 
 	return ret;
@@ -1244,13 +1266,16 @@ void displayport_reg_init(void)
 	displayport_reg_set_lane_map_config(displayport);
 }
 
-void displayport_reg_set_video_configuration(u8 bpc)
+void displayport_reg_set_video_configuration(u8 bpc, u8 range)
 {
-	displayport_reg_set_daynamic_range(CEA_RANGE);
+	displayport_reg_set_daynamic_range((range)?CEA_RANGE:VESA_RANGE);
 	displayport_write_mask(Video_Control_2, (bpc)?1:0, IN_BPC);	/* 0:6bits, 1:8bits */
 	displayport_write_mask(Video_Control_2, 0, IN_COLOR_F);		/* RGB */
 	displayport_write_mask(Video_Control_10, 0, F_SEL);		/* Video Format Auto Calculation mode */
 	displayport_write_mask(DP_System_Control_4, 0, FIX_M_VID);	/* M_VID Auto Calculation mode */
+
+	displayport_info("set video config bpc:%d range:%s\n",
+		(bpc)?8:6, (range)?"CEA_RANGE":"VESA_RANGE");
 }
 
 void displayport_reg_set_bist_video_configuration(videoformat video_format, u8 bpc, u8 type, u8 range)
@@ -1296,6 +1321,21 @@ void displayport_reg_set_avi_infoframe(struct infoframe avi_infoframe)
 	displayport_write_mask(Packet_Send_Control, 1, AVI_UD);
 	displayport_write_mask(Packet_Send_Control, 1, AVI_EN);
 }
+
+#ifdef FEATURE_SUPPORT_SPD_INFOFRAME
+void displayport_reg_set_spd_infoframe(struct infoframe avi_infoframe)
+{
+	int i;
+
+	displayport_write(SPD_infoFrame_Packet_Type_Register, avi_infoframe.type_code);
+	
+	for (i = 0; i < avi_infoframe.length; i++)
+		displayport_write(SPD_infoFrame_Packet_Data_Register + i * 4, avi_infoframe.data[i]);
+
+	displayport_write_mask(Packet_Send_Control, 1, SPD_INFO_UP);
+	displayport_write_mask(Packet_Send_Control, 1, SPD_INFO_EN);
+}
+#endif
 
 void displayport_reg_set_audio_infoframe(struct infoframe audio_infoframe, u32 en)
 {

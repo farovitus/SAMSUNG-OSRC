@@ -907,23 +907,26 @@ translate_table(struct net *net, struct xt_table_info *newinfo, void *entry0,
 				}
 			}
 		} else if (ourchain == ONESHOT_UID_FIND_UIDCHAIN) {
-			int ret = 0;
 			if (previous_ematch) {
-				ret = oneshot_uid_addrule_to_map(&oneshot_uid_ipv6,
+				int ret = oneshot_uid_addrule_to_map(&oneshot_uid_ipv6,
 							     previous_ematch);
-			}
-
-			if (ret != -ENOMEM) {
-				xt_ematch_foreach(ematch, iter) {
-					previous_ematch = ematch->data;
+				if (ret == -ENOMEM) {
+					ourchain = ONESHOT_UID_FINE_END;
+					oneshot_uid_ipv6.myfilter_table = NULL;
+					oneshot_uid_ipv6.myrule_offset = 0;
+					pr_err("ip6tables: oneshot_uid failed to alloc memory\n");
+					continue;
 				}
-
-				if (rulenum == 0)
-					oneshot_uid_ipv6.myrule_offset =
-							((void *)iter - entry0);
-
-				rulenum++;
 			}
+
+			xt_ematch_foreach(ematch, iter) {
+				previous_ematch = ematch->data;
+			}
+
+			if (rulenum == 0)
+				oneshot_uid_ipv6.myrule_offset =
+						((void *)iter - entry0);
+			rulenum++;
 #endif
 		}
 	}

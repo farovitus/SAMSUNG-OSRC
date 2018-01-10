@@ -452,6 +452,9 @@ struct link_device {
 	/* MIF buffer management */
 	struct mif_buff_mng *mif_buff_mng;
 
+	/* Save reason of forced crash */
+	unsigned int crash_type;
+
 	int (*init_comm)(struct link_device *ld, struct io_device *iod);
 	void (*terminate_comm)(struct link_device *ld, struct io_device *iod);
 

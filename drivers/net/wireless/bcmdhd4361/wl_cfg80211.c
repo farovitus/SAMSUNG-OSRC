@@ -12440,14 +12440,14 @@ wl_notify_connect_status(struct bcm_cfg80211 *cfg, bcm_struct_cfgdev *cfgdev,
 
 				if (event == WLC_E_DEAUTH_IND || event == WLC_E_DISASSOC_IND)
 					reason = ntoh32(e->reason);
-				/* WLAN_REASON_UNSPECIFIED is used for hang up event in Android */
-				reason = (reason == WLAN_REASON_UNSPECIFIED)? 0 : reason;
-
 #ifdef SET_SSID_FAIL_CUSTOM_RC
 				if (event == WLC_E_SET_SSID) {
 					reason = SET_SSID_FAIL_CUSTOM_RC;
 				}
 #endif /* SET_SSID_FAIL_CUSTOM_RC */
+				/* WLAN_REASON_UNSPECIFIED is used for hang up event in Android */
+				reason = (reason == WLAN_REASON_UNSPECIFIED)? 0 : reason;
+
 				WL_ERR(("link down if %s may call cfg80211_disconnected. "
 					"event : %d, reason=%d from " MACDBG "\n",
 					ndev->name, event, ntoh32(e->reason),
@@ -16252,6 +16252,7 @@ s32 wl_cfg80211_attach(struct net_device *ndev, void *context)
 	INIT_LIST_HEAD(&cfg->wbtext_bssid_list);
 #endif /* WBTEXT */
 	INIT_LIST_HEAD(&cfg->vndr_oui_list);
+	spin_lock_init(&cfg->vndr_oui_sync);
 	spin_lock_init(&cfg->net_list_sync);
 	ndev->ieee80211_ptr = wdev;
 	SET_NETDEV_DEV(ndev, wiphy_dev(wdev->wiphy));
@@ -19865,20 +19866,23 @@ wl_vndr_ies_check_duplicate_vndr_oui(struct bcm_cfg80211 *cfg,
 	struct parsed_vndr_ie_info *vndr_info)
 {
 	wl_vndr_oui_entry_t *oui_entry = NULL;
+	unsigned long flags;
 
+	spin_lock_irqsave(&cfg->vndr_oui_sync, flags);
 #if defined(STRICT_GCC_WARNINGS) && defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
 #endif
 	list_for_each_entry(oui_entry, &cfg->vndr_oui_list, list) {
 		if (!memcmp(oui_entry->oui, vndr_info->vndrie.oui, DOT11_OUI_LEN)) {
+			spin_unlock_irqrestore(&cfg->vndr_oui_sync, flags);
 			return TRUE;
 		}
 	}
 #if defined(STRICT_GCC_WARNINGS) && defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif
-
+	spin_unlock_irqrestore(&cfg->vndr_oui_sync, flags);
 	return FALSE;
 }
 
@@ -19887,6 +19891,7 @@ wl_vndr_ies_add_vendor_oui_list(struct bcm_cfg80211 *cfg,
 	struct parsed_vndr_ie_info *vndr_info)
 {
 	wl_vndr_oui_entry_t *oui_entry = NULL;
+	unsigned long flags;
 
 	oui_entry = kmalloc(sizeof(*oui_entry), GFP_KERNEL);
 	if (oui_entry == NULL) {
@@ -19897,7 +19902,9 @@ wl_vndr_ies_add_vendor_oui_list(struct bcm_cfg80211 *cfg,
 	memcpy(oui_entry->oui, vndr_info->vndrie.oui, DOT11_OUI_LEN);
 
 	INIT_LIST_HEAD(&oui_entry->list);
+	spin_lock_irqsave(&cfg->vndr_oui_sync, flags);
 	list_add_tail(&oui_entry->list, &cfg->vndr_oui_list);
+	spin_unlock_irqrestore(&cfg->vndr_oui_sync, flags);
 
 	return TRUE;
 }
@@ -19906,7 +19913,9 @@ static void
 wl_vndr_ies_clear_vendor_oui_list(struct bcm_cfg80211 *cfg)
 {
 	wl_vndr_oui_entry_t *oui_entry = NULL;
+	unsigned long flags;
 
+	spin_lock_irqsave(&cfg->vndr_oui_sync, flags);
 #if defined(STRICT_GCC_WARNINGS) && defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
@@ -19921,6 +19930,7 @@ wl_vndr_ies_clear_vendor_oui_list(struct bcm_cfg80211 *cfg)
 #if defined(STRICT_GCC_WARNINGS) && defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif
+	spin_unlock_irqrestore(&cfg->vndr_oui_sync, flags);
 }
 
 static int
@@ -19937,6 +19947,7 @@ wl_vndr_ies_get_vendor_oui(struct bcm_cfg80211 *cfg, struct net_device *ndev,
 
 	char *pos = vndr_oui;
 	u32 remained_buf_len = vndr_oui_len;
+	unsigned long flags;
 
 	if (!conn_info->resp_ie_len) {
 		return BCME_ERROR;
@@ -19962,12 +19973,14 @@ wl_vndr_ies_get_vendor_oui(struct bcm_cfg80211 *cfg, struct net_device *ndev,
 	}
 
 	if (vndr_oui) {
+		spin_lock_irqsave(&cfg->vndr_oui_sync, flags);
 #if defined(STRICT_GCC_WARNINGS) && defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
 #endif
 		list_for_each_entry(oui_entry, &cfg->vndr_oui_list, list) {
 			if (remained_buf_len < VNDR_OUI_STR_LEN) {
+				spin_unlock_irqrestore(&cfg->vndr_oui_sync, flags);
 				return BCME_ERROR;
 			}
 			pos += snprintf(pos, VNDR_OUI_STR_LEN, "%02X-%02X-%02X ",
@@ -19977,6 +19990,7 @@ wl_vndr_ies_get_vendor_oui(struct bcm_cfg80211 *cfg, struct net_device *ndev,
 #if defined(STRICT_GCC_WARNINGS) && defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif
+		spin_unlock_irqrestore(&cfg->vndr_oui_sync, flags);
 	}
 
 	return vndr_oui_num;
@@ -19987,7 +20001,9 @@ wl_cfg80211_get_vndr_ouilist(struct bcm_cfg80211 *cfg, uint8 *buf, int max_cnt)
 {
 	wl_vndr_oui_entry_t *oui_entry = NULL;
 	int cnt = 0;
+	unsigned long flags;
 
+	spin_lock_irqsave(&cfg->vndr_oui_sync, flags);
 #if defined(STRICT_GCC_WARNINGS) && defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
@@ -19996,6 +20012,7 @@ wl_cfg80211_get_vndr_ouilist(struct bcm_cfg80211 *cfg, uint8 *buf, int max_cnt)
 		memcpy(buf, oui_entry->oui, DOT11_OUI_LEN);
 		cnt++;
 		if (cnt >= max_cnt) {
+			spin_unlock_irqrestore(&cfg->vndr_oui_sync, flags);
 			return cnt;
 		}
 		buf += DOT11_OUI_LEN;
@@ -20003,6 +20020,7 @@ wl_cfg80211_get_vndr_ouilist(struct bcm_cfg80211 *cfg, uint8 *buf, int max_cnt)
 #if defined(STRICT_GCC_WARNINGS) && defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif
+	spin_unlock_irqrestore(&cfg->vndr_oui_sync, flags);
 	return cnt;
 }
 

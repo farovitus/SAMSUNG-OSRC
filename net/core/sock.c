@@ -685,7 +685,9 @@ static int sock_set_domain_name(struct sock *sk, char __user *optval,
     ret = -EFAULT;
     if (copy_from_user(domain, optval, optlen))
         goto out;
-    memcpy(sk->domain_name,domain, sizeof(sk->domain_name)-1);
+    if(sk->domain_name[0] == '\0') {
+        memcpy(sk->domain_name,domain, sizeof(sk->domain_name)-1);
+    }
     ret = 0;
 
 out:
@@ -1495,10 +1497,6 @@ struct sock *sk_alloc(struct net *net, int family, gfp_t priority,
 {
 	struct sock *sk;
 
-    /* START_OF_KNOX_VPN */
-    struct timespec open_timespec;
-    /* END_OF_KNOX_VPN */
-
 	sk = sk_prot_alloc(prot, priority | __GFP_ZERO, family);
 	if (sk) {
 		sk->sk_family = family;
@@ -1519,8 +1517,6 @@ struct sock *sk_alloc(struct net *net, int family, gfp_t priority,
         /* START_OF_KNOX_VPN */
         sk->knox_uid = current->cred->uid.val;
         sk->knox_pid = current->tgid;
-        open_timespec = current_kernel_time();
-        sk->open_time = open_timespec.tv_sec;
         /* END_OF_KNOX_VPN */
 	}
 

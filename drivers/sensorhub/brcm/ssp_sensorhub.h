@@ -44,14 +44,14 @@
 	pr_debug("[SSP]: %s -\n" str, __func__, ##args)
 #define sensorhub_err(str, args...) \
 	pr_err("[SSP]: %s -\n" str, __func__, ##args)
-	
+
 #define KERNEL_RESET            0x01
 #define MCU_CRASHED             0x02
 #define MCU_INTENDED_RESET		0x03
 
 struct sensorhub_event {
 	char *library_data;
-    char library_event_number;
+	char library_event_number;
 	int library_length;
 };
 

@@ -65,6 +65,10 @@
 #endif /* CONFIG_SEC_DEBUG */
 #endif /* CONFIG_SEC_EXT */
 
+#ifdef CONFIG_EXYNOS_SNAPSHOT_CRASH_KEY
+#include <linux/gpio_keys.h>
+#endif
+
 /*  Size domain */
 #define ESS_KEEP_HEADER_SZ		(SZ_256 * 3)
 #define ESS_HEADER_SZ			SZ_4K
@@ -1046,6 +1050,9 @@ int exynos_ss_post_reboot(void)
 	pr_emerg("exynos-snapshot: normal reboot done\n");
 
 	exynos_ss_save_context(NULL);
+#ifdef CONFIG_SEC_DEBUG
+	sec_debug_reboot_handler();
+#endif
 	flush_cache_all();
 
 	return 0;
@@ -1663,16 +1670,15 @@ static int exynos_ss_sfr_dump_init(struct device_node *np)
 }
 #endif
 
-#ifdef CONFIG_SEC_UPLOAD
-extern void check_crash_keys_in_user(unsigned int code, int onoff);
-#endif
+#ifdef CONFIG_EXYNOS_SNAPSHOT_CRASH_KEY
 #ifdef CONFIG_TOUCHSCREEN_DUMP_MODE
 struct tsp_dump_callbacks dump_callbacks;
 #endif
-
-#ifdef CONFIG_EXYNOS_SNAPSHOT_CRASH_KEY
-void exynos_ss_check_crash_key(unsigned int code, int value)
+static int exynos_ss_check_crash_key(struct notifier_block *nb,
+				   unsigned long c, void *v)
 {
+	unsigned int code = c;
+	int value = *(int *)v;
 	static bool volup_p;
 	static bool voldown_p;
 	static int loopcount;
@@ -1682,12 +1688,8 @@ void exynos_ss_check_crash_key(unsigned int code, int value)
 	static const unsigned int VOLUME_DOWN = KEY_VOLUMEDOWN;
 
 #ifdef CONFIG_SEC_DEBUG
-	hard_reset_hook(code, value);
 	if ((sec_debug_get_debug_level() & 0x1) != 0x1) {
-#ifdef CONFIG_SEC_UPLOAD
-		check_crash_keys_in_user(code, value);
-#endif
-		return;
+		return NOTIFY_DONE;
 	}
 #endif
 
@@ -1742,7 +1744,11 @@ void exynos_ss_check_crash_key(unsigned int code, int value)
 			voldown_p = false;
 		}
 	}
+	return NOTIFY_OK;
 }
+static struct notifier_block nb_gpio_keys = {
+	.notifier_call = exynos_ss_check_crash_key
+};
 #endif
 
 
@@ -2104,9 +2110,6 @@ static int exynos_ss_reboot_handler(struct notifier_block *nb,
 		return 0;
 
 	pr_emerg("exynos-snapshot: normal reboot starting\n");
-#ifdef CONFIG_SEC_DEBUG
-	sec_debug_reboot_handler();
-#endif
 
 	return 0;
 }
@@ -2568,6 +2571,9 @@ static int __init exynos_ss_init(void)
 		register_hook_logger(exynos_ss_hook_logger);
 #endif
 		register_reboot_notifier(&nb_reboot_block);
+#ifdef CONFIG_EXYNOS_SNAPSHOT_CRASH_KEY
+		register_gpio_keys_notifier(&nb_gpio_keys);
+#endif
 		atomic_notifier_chain_register(&panic_notifier_list, &nb_panic_block);
 	} else
 		pr_err("exynos-snapshot: %s failed\n", __func__);

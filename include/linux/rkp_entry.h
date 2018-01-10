@@ -41,6 +41,7 @@
 #define RKP_INIT	 RKP_CMDID(0)
 #define RKP_DEF_INIT	 RKP_CMDID(1)
 #define RKP_DEBUG	 RKP_CMDID(2)
+#define RKP_NOSHIP_BIN	 RKP_CMDID(3)
 
 #define RKP_INIT_MAGIC 0x5afe0001
 #define RKP_VMM_BUFFER 0x600000
@@ -49,7 +50,10 @@
 #define KASLR_MEM_RESERVE  RKP_CMDID(0x70)
 #define RKP_FIMC_VERIFY	RKP_CMDID(0x71)
 
-/*** TODO: We need to export this so it is hard coded 
+#define RKP_FIMC_FAIL 0x10
+#define RKP_FIMC_SUCCESS 0xa5
+
+/*** TODO: We need to export this so it is hard coded
      at one place*/
 
 #ifdef CONFIG_RKP_6G
@@ -67,7 +71,7 @@
 #define   TIMA_DEBUG_LOG_SIZE   1<<18
 
 #define   TIMA_SEC_LOG          0xB0800000
-#define   TIMA_SEC_LOG_SIZE     0x7000 
+#define   TIMA_SEC_LOG_SIZE     0x7000
 
 #ifdef CONFIG_RKP_6G
 #define   TIMA_PHYS_MAP         0xAFE00000
@@ -119,6 +123,8 @@ struct rkp_init {
 	u64 _srodata;
 	u64 _erodata;
 	u32 large_memory;
+	u64 fimc_phys_addr;
+	u64 fimc_size;
 } __attribute__((packed));
 
 #ifdef CONFIG_RKP_KDP
@@ -170,15 +176,22 @@ void rkp_call(unsigned long long cmd, unsigned long long arg0, unsigned long lon
 
 #define DRAM1_SIZE	(PHYS_PFN_OFFSET_MAX_DRAM1 - PHYS_PFN_OFFSET_MIN_DRAM1)
 #define DRAM2_SIZE	(PHYS_PFN_OFFSET_MAX_DRAM2 - PHYS_PFN_OFFSET_MIN_DRAM2)
-#define DRAM_GAP	(PHYS_PFN_OFFSET_MIN_DRAM2 - PHYS_PFN_OFFSET_MAX_DRAM1)	
+#define DRAM_GAP	(PHYS_PFN_OFFSET_MIN_DRAM2 - PHYS_PFN_OFFSET_MAX_DRAM1)
 
-	
+#define FIMC_LIB_OFFSET_VA		(VMALLOC_START + 0xF6000000)
+#define FIMC_LIB_START_VA		(FIMC_LIB_OFFSET_VA + 0x04000000)
+#define FIMC_VRA_LIB_SIZE		(0x80000)
+#define FIMC_DDK_LIB_SIZE		(0x400000)
+#define FIMC_RTA_LIB_SIZE		(0x300000)
+
+#define FIMC_LIB_SIZE			(FIMC_VRA_LIB_SIZE + FIMC_DDK_LIB_SIZE + FIMC_RTA_LIB_SIZE)
+
 static inline u64 rkp_get_sys_index(u64 pfn) {
-	if (pfn >= PHYS_PFN_OFFSET_MIN_DRAM1 
+	if (pfn >= PHYS_PFN_OFFSET_MIN_DRAM1
 		&& pfn < PHYS_PFN_OFFSET_MAX_DRAM1) {
 		return ((pfn) - PHYS_PFN_OFFSET);
 	}
-	if (pfn >= PHYS_PFN_OFFSET_MIN_DRAM2 
+	if (pfn >= PHYS_PFN_OFFSET_MIN_DRAM2
 		&& pfn < PHYS_PFN_OFFSET_MAX_DRAM2) {
 		return ((pfn) - PHYS_PFN_OFFSET - DRAM_GAP);
 	}
@@ -198,7 +211,7 @@ static inline u8 rkp_is_protected(u64 va,u64 pa, u64 *base_addr,u64 type)
 	/* We are going to ignore if input address NOT belong to DRAM area */
 	if((phys_addr < PHYS_OFFSET) || (index ==(~0ULL)) ||
 		(phys_addr  > RKP_PHYS_OFFSET_MAX)) {
-		return 0;	
+		return 0;
 	}
 
 	p += (tmp);

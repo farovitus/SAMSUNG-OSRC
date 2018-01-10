@@ -142,7 +142,7 @@ static int tima_setup_rkp_mem(void){
 	return 1;
 }
 #endif
-static int __init sec_tima_log_setup(char *str)
+static int __init tima_log_setup(char *str)
 {
 	unsigned size = memparse(str, &str);
 	unsigned long base = 0;
@@ -170,7 +170,7 @@ static int __init sec_tima_log_setup(char *str)
 out:
 	return 0;
 }
-__setup("sec_tima_log=", sec_tima_log_setup);
+__setup("tima_log=", tima_log_setup);
 
 ssize_t	tima_read(struct file *filep, char __user *buf, size_t size, loff_t *offset)
 {

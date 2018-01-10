@@ -187,6 +187,7 @@ struct sec_battery_info {
 
 	bool is_sysovlo;
 	bool is_vbatovlo;
+	bool is_abnormal_temp;
 
 	bool safety_timer_set;
 	bool lcd_status;
@@ -235,6 +236,11 @@ struct sec_battery_info {
 	struct cisd cisd;
 	bool skip_cisd;
 	bool usb_overheat_check;
+	int prev_volt;
+	int prev_temp;
+	int prev_jig_on;
+	int enable_update_data;
+	int prev_chg_on;
 #endif
 
 	/* battery check */
@@ -393,6 +399,7 @@ struct sec_battery_info {
 #endif
 #if defined(CONFIG_CALC_TIME_TO_FULL)
 	int timetofull;
+	struct delayed_work timetofull_work;
 #endif
 	struct delayed_work slowcharging_work;
 #if defined(CONFIG_BATTERY_AGE_FORECAST)
@@ -604,6 +611,8 @@ enum {
 	CISD_WIRE_COUNT,
 	CISD_WC_DATA,
 	CISD_WC_DATA_JSON,
+	PREV_BATTERY_DATA,
+	PREV_BATTERY_INFO,
 #endif
 #if defined(CONFIG_BATTERY_SBM_DATA)
 	SBM_DATA,

@@ -320,6 +320,13 @@ void dma_reg_set_sfr_update_force(u32 id)
 	dma_write_mask(id, IDMA_ENABLE, ~0, IDMA_SFR_UPDATE_FORCE);
 }
 
+void dma_reg_set_sfr_update_force_en(u32 id, u32 en)
+{
+	u32 val = en ? ~0 : 0;
+
+	dma_write_mask(id, IDMA_ENABLE, val, IDMA_SFR_UPDATE_FORCE);
+}
+
 /* G0_S only */
 void dma_reg_set_secure_mode(u32 id, u32 en)
 {
@@ -720,6 +727,13 @@ u32 dma_reg_get_cfg_err_state(u32 id)
 		val = dma_read(id, IDMA_CFG_ERR_STATE);
 		return IDMA_CFG_ERR_GET(val);
 	}
+}
+
+void dma_reg_set_afbc_sw_recovery(u32 id, u32 en)
+{
+	dma_reg_set_afbc_en(id, en);
+	dma_reg_set_sfr_update_force_en(id, 1);
+	dma_reg_set_sfr_update_force_en(id, 0);
 }
 
 int dpp_reg_wait_op_status(u32 id)
@@ -1313,10 +1327,8 @@ int dpp_reg_set_format(u32 id, struct dpp_params_info *p)
 	}
 
 	dma_reg_set_afbc_en(id, p->is_comp);
-	if (p->is_comp)
-		dma_reg_set_recovery_en(id, 1);
-	else
-		dma_reg_set_recovery_en(id, 0);
+	/* HW recovery off */
+	dma_reg_set_recovery_en(id, 0);
 
 	return 0;
 }
@@ -1544,4 +1556,7 @@ void dpp_reg_configure_params(u32 id, struct dpp_params_info *p)
 	dpp_reg_set_buf_addr(id, p);
 	dpp_reg_set_block_area(id, p);
 	dpp_reg_set_format(id, p);
+	/* special case for color fill */
+	if (id == ODMA_WB)
+		dpp_reg_set_plane_alpha(id, p->plane_alpha);
 }

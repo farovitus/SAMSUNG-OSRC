@@ -546,7 +546,7 @@ config EXYNOS_IMA
 
 config TIMA_LOG
 	tristate "Support for dumping TIMA log"
-	depends on TIMA
+	depends on TIMA_RKP
 	default y
 	help
 	  This option enables support for dumping TIMA log.
@@ -566,4 +566,16 @@ source "drivers/misc/cxl/Kconfig"
 source "drivers/misc/mcu_ipc/Kconfig"
 source "drivers/misc/modem_if/Kconfig"
 source "drivers/misc/modem_v1/Kconfig"
+
+menuconfig SEC_SIPC_HIGGS_MODEM_IF
+
+	bool "Samsung Mobile SIPC 5G HIGGS Modem Interface"
+	default n
+	---help---
+	  Samsung 5G Modem Interface Driver
+
+if SEC_SIPC_HIGGS_MODEM_IF
+source "drivers/misc/modem_5g/Kconfig"
+endif
+
 endmenu

@@ -41,7 +41,7 @@ extern int hrm_info;
 #define VENDOR					"ADI"
 
 #define VENDOR_VERISON			"2"
-#define VERSION					"29"
+#define VERSION					"30"
 
 #define ADPD143_SLAVE_ADDR		0x64
 
@@ -217,10 +217,10 @@ enum {
 
 /* AGC mode */
 enum {
-	M_HRM, // finger detection, IR&Red No Saturation
-	M_HRMLED_IR, //IR Only No Saturation
-	M_HRMLED_RED, //RED Only No Saturation
-	M_HRMLED_BOTH, //IR&Red No Saturation
+	M_HRM, /* finger detection, IR&Red No Saturation */
+	M_HRMLED_IR, /* IR Only No Saturation */
+	M_HRMLED_RED, /* RED Only No Saturation */
+	M_HRMLED_BOTH, /* IR&Red No Saturation */
 	M_NONE
 };
 
@@ -1321,7 +1321,7 @@ static AGC_ErrCode_t __adpd_stepAgcLedA(unsigned *rawData)
 
 					return MwErrProcessing;
 				} else {
-					NoSkipSamples = 0;//<--here
+					NoSkipSamples = 0;
 					HRM_dbg("%s - MwErrLedAOutofRange4[End]\n", __func__);
 					return MwErrLedAOutofRange;
 				}
@@ -1434,7 +1434,7 @@ static AGC_ErrCode_t __adpd_stepAgcLedA(unsigned *rawData)
 
 					return MwErrProcessing;
 				} else {
-					NoSkipSamples = 0;//<--here
+					NoSkipSamples = 0;
 					HRM_dbg("%s - MwErrLedAOutofRange9[End]\n", __func__);
 					return MwErrLedAOutofRange;
 				}
@@ -1543,7 +1543,7 @@ static AGC_ErrCode_t __adpd_stepAgcLedB(unsigned *rawData)
 
 					return MwErrProcessing;
 				} else {
-					NoSkipSamples = 0;//<--here
+					NoSkipSamples = 0;
 					HRM_dbg("%s - MwErrLedAOutofRange1[End]\n", __func__);
 					return MwErrLedAOutofRange;
 				}
@@ -1575,7 +1575,7 @@ static AGC_ErrCode_t __adpd_stepAgcLedB(unsigned *rawData)
 
 						return MwErrProcessing;
 					} else {
-						NoSkipSamples = 0;//<--here
+						NoSkipSamples = 0;
 						HRM_dbg("%s - MwErrLedAOutofRange2[End]\n", __func__);
 						return MwErrLedAOutofRange;
 					}
@@ -1594,7 +1594,7 @@ static AGC_ErrCode_t __adpd_stepAgcLedB(unsigned *rawData)
 
 					return MwErrProcessing;
 				} else {
-					NoSkipSamples = 0;//<--here
+					NoSkipSamples = 0;
 					HRM_dbg("%s - MwErrLedAOutofRange4[End]\n", __func__);
 					return MwErrLedAOutofRange;
 				}
@@ -1621,7 +1621,7 @@ static AGC_ErrCode_t __adpd_stepAgcLedB(unsigned *rawData)
 				}
 			}
 		} else {
-			NoSkipSamples = 0;//<<--here
+			NoSkipSamples = 0;
 			HRM_info("%s - MwErrPass[End]\n", __func__);
 			return MwErrPass;
 		}
@@ -1645,7 +1645,7 @@ static AGC_ErrCode_t __adpd_stepAgcLedB(unsigned *rawData)
 
 					return MwErrProcessing;
 				} else {
-					NoSkipSamples = 0;//<--here
+					NoSkipSamples = 0;
 					HRM_dbg("%s - MwErrLedAOutofRange6[End]\n", __func__);
 
 					return MwErrLedAOutofRange;
@@ -1672,7 +1672,7 @@ static AGC_ErrCode_t __adpd_stepAgcLedB(unsigned *rawData)
 
 						return MwErrProcessing;
 					} else {
-						NoSkipSamples = 0;//<--here
+						NoSkipSamples = 0;
 						HRM_dbg("%s - MwErrLedAOutofRange7[End]\n", __func__);
 						return MwErrLedAOutofRange;
 					}
@@ -1706,13 +1706,13 @@ static AGC_ErrCode_t __adpd_stepAgcLedB(unsigned *rawData)
 
 					return MwErrProcessing;
 				} else {
-					NoSkipSamples = 0;//<--here
+					NoSkipSamples = 0;
 					HRM_dbg("%s - MwErrLedAOutofRange9[End]\n", __func__);
 					return MwErrLedAOutofRange;
 				}
 			}
 		} else {
-			NoSkipSamples = 0;//<-here
+			NoSkipSamples = 0;
 			HRM_info("%s - MwErrPass[End]\n", __func__);
 			return MwErrPass;
 		}
@@ -1914,7 +1914,7 @@ OBJ_PROXIMITY_STATUS __adpd_checkObjProximity(unsigned *dataInA, unsigned *dataI
 
 			__adpd_reg_write(adpd_data, ADPD_OP_MODE_ADDR, GLOBAL_OP_MODE_IDLE);
 
-			//More safety offet to guarantee any remaning DC noise after dark calibration
+			/* More safety offet to guarantee any remaning DC noise after dark calibration */
 			if (!adpd_data->Is_Hrm_Dark_Calibrated) {
 				g_eol_ADCOffset[0] += CH1_OFFSET_PER_PULSE_FOR_DC_NOISE_REMOVAL;
 				g_eol_ADCOffset[1] += CH2_OFFSET_PER_PULSE_FOR_DC_NOISE_REMOVAL;
@@ -4320,7 +4320,7 @@ int adpd_deinit_device(void)
 
 	mutex_unlock(&adpd_data->mutex);
 	mutex_destroy(&adpd_data->mutex);
-	
+
 	kfree(adpd_data);
 	adpd_data = NULL;
 
@@ -4722,6 +4722,12 @@ int adpd_set_eol_enable(u8 enable)
 		adpd_data->eol_test_is_enable = enable;
 
 		if (enable) {
+			if (adpd_data->hrm_mode == 0) {
+				HRM_dbg("%s - eol enable set fail. hrm mode is IDLE \n", __func__);
+				adpd_data->eol_test_is_enable = 0;
+				mutex_unlock(&adpd_data->mutex);
+				return -EPERM;
+			}
 			__adpd_mode_switching(adpd_data, SAMPLE_EOL_MODE);
 			adpd_data->eol_test_status = 0;
 		} else

@@ -1047,6 +1047,8 @@ static int max77865_chg_set_property(struct power_supply *psy,
 				max77865_read_reg(charger->i2c,
 						  MAX77865_CHG_REG_INT_MASK, &reg_data);
 				pr_info("%s : disable aicl : 0x%x\n", __func__, reg_data);
+				charger->aicl_on = false;
+				charger->slow_charging = false;
 			}
 		}
 		break;
@@ -1450,7 +1452,9 @@ static irqreturn_t max77865_bypass_irq(int irq, void *data)
 #ifdef CONFIG_USB_HOST_NOTIFY
 		if (o_notify) {
 			send_otg_notify(o_notify, NOTIFY_EVENT_OVERCURRENT, 0);
-			o_notify->hw_param[USB_CCIC_OVC_COUNT]++;
+#ifdef CONFIG_USB_HW_PARAM
+			inc_hw_param(o_notify, USB_CCIC_OVC_COUNT);
+#endif
 		}
 #endif
 		/* disable the register values just related to OTG and
@@ -1493,10 +1497,10 @@ static void max77865_aicl_isr_work(struct work_struct *work)
 		value.intval = max77865_get_input_current(charger);
 		psy_do_property("battery", set,
 				POWER_SUPPLY_EXT_PROP_AICL_CURRENT, value);
-	}
 
-	if (is_not_wireless_type(charger->cable_type))
-		max77865_check_slow_charging(charger, charger->input_current);
+		if (is_not_wireless_type(charger->cable_type))
+			max77865_check_slow_charging(charger, charger->input_current);
+	}
 
 	max77865_update_reg(charger->i2c,
 			    MAX77865_CHG_REG_INT_MASK, 0, MAX77865_AICL_IM);

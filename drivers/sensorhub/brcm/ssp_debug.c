@@ -40,7 +40,7 @@ void ssp_dump_task(struct work_struct *work)
 	int iTimeTemp;
 	mm_segment_t fs;
 	int buf_len, packet_len, residue;
-	int iRet = 0, index = 0, iRetTrans = 0, iRetWrite = 0;
+	int index = 0, iRetTrans = 0, iRetWrite = 0;
 
 	big = container_of(work, struct ssp_big, work);
 	pr_err("[SSP]: %s - start ssp dumping (%d)(%d)\n",
@@ -245,6 +245,10 @@ void reset_mcu(struct ssp_data *data)
 	ssp_enable(data, false);
 	clean_pending_list(data);
 	bbd_mcu_reset();
+
+	data->uTimeOutCnt = 0;
+	data->uComFailCnt = 0;
+	data->mcuAbnormal = false;
 }
 
 void sync_sensor_state(struct ssp_data *data)
@@ -336,8 +340,8 @@ static void print_sensordata(struct ssp_data *data, unsigned int uSensor)
 		break;
 	case PRESSURE_SENSOR:
 		ssp_dbg("[SSP] %u : %d, %d (%ums, %dms)\n", uSensor,
-			data->buf[uSensor].pressure[0],
-			data->buf[uSensor].pressure[1],
+			data->buf[uSensor].pressure,
+			data->buf[uSensor].temperature,
 			get_msdelay(data->adDelayBuf[uSensor]),
 			data->batchLatencyBuf[uSensor]);
 		break;
@@ -360,14 +364,18 @@ static void print_sensordata(struct ssp_data *data, unsigned int uSensor)
 			data->buf[uSensor].a_time, data->buf[uSensor].a_gain,
 			get_msdelay(data->adDelayBuf[uSensor]));
 		break;
+	case LIGHT_FLICKER_SENSOR:
+		ssp_dbg("[SSP] %u : %u, (%ums)\n", uSensor,
+			data->buf[uSensor].light_flicker, get_msdelay(data->adDelayBuf[uSensor]));
+		break;
 	case PROXIMITY_SENSOR:
 		ssp_dbg("[SSP] %u : %d, %d (%ums)\n", uSensor,
-			data->buf[uSensor].prox[0], data->buf[uSensor].prox[1],
+			data->buf[uSensor].prox_detect, data->buf[uSensor].prox_adc,
 			get_msdelay(data->adDelayBuf[uSensor]));
 		break;
 	case PROXIMITY_ALERT_SENSOR:
 		ssp_dbg("[SSP] %u : %d, %d (%ums)\n", uSensor,
-			data->buf[uSensor].prox_alert[0], data->buf[uSensor].prox_alert[1],
+			data->buf[uSensor].prox_alert_detect, data->buf[uSensor].prox_alert_adc,
 			get_msdelay(data->adDelayBuf[uSensor]));
 		break;
 	case STEP_DETECTOR:
@@ -410,30 +418,30 @@ static void print_sensordata(struct ssp_data *data, unsigned int uSensor)
 			data->buf[uSensor].ir_b, data->buf[uSensor].ir_w,
 			data->buf[uSensor].ir_a_time, data->buf[uSensor].ir_a_gain,
 			get_msdelay(data->adDelayBuf[uSensor]));
-        break;
-    case TILT_DETECTOR:
-        ssp_dbg("[SSP] %u : %u(%ums)\n", uSensor,
+		break;
+	case TILT_DETECTOR:
+		ssp_dbg("[SSP] %u : %u(%ums)\n", uSensor,
 			data->buf[uSensor].tilt_detector,
-			get_msdelay(data->adDelayBuf[uSensor]));
-        break;
-    case PICKUP_GESTURE:
-        ssp_dbg("[SSP] %u : %u(%ums)\n", uSensor,
+		get_msdelay(data->adDelayBuf[uSensor]));
+		break;
+	case PICKUP_GESTURE:
+		ssp_dbg("[SSP] %u : %u(%ums)\n", uSensor,
 			data->buf[uSensor].pickup_gesture,
 			get_msdelay(data->adDelayBuf[uSensor]));
-        break;
-    case BULK_SENSOR:
-    case GPS_SENSOR:
-        break;
+		break;
+	case BULK_SENSOR:
+	case GPS_SENSOR:
+		break;
 	default:
 		ssp_dbg("[SSP] Wrong sensorCnt: %u\n", uSensor);
 		break;
 	}
 }
 /*
-	check_sensor_event
-	- return
-		true : there is no accel or light sensor event over 5sec when sensor is registered
-*/
+ *check_sensor_event
+ *- return
+ *        true : there is no accel or light sensor event over 5sec when sensor is registered
+ */
 bool check_wait_event(struct ssp_data *data)
 {
 	u64 timestamp = get_current_timestamp();
@@ -441,18 +449,16 @@ bool check_wait_event(struct ssp_data *data)
 	int i, sensor;
 	bool res = false;
 
-	for(i = 0 ; i < 2 ; i++)
-	{
+	for (i = 0 ; i < 2 ; i++) {
 		sensor = check_sensors[i];
 		//the sensor is registered
-		if((atomic64_read(&data->aSensorEnable) & (1 << sensor))
+		if ((atomic64_read(&data->aSensorEnable) & (1 << sensor))
 			//non batching mode
 			&& data->IsBypassMode[sensor] == 1
 			//there is no sensor event over 3sec
-			&& data->LastSensorTimeforReset[sensor] + 3000000000ULL < timestamp)
-		{
+			&& data->LastSensorTimeforReset[sensor] + 3000000000ULL < timestamp) {
 			pr_info("[SSP] %s - sensor(%d) last = %lld, cur = %lld\n",
-				__func__,sensor,data->LastSensorTimeforReset[sensor],timestamp);
+				__func__, sensor, data->LastSensorTimeforReset[sensor], timestamp);
 			res = true;
 			data->uNoRespSensorCnt++;
 		}
@@ -468,20 +474,20 @@ static void debug_work_func(struct work_struct *work)
 	unsigned int uSensorCnt;
 	struct ssp_data *data = container_of(work, struct ssp_data, work_debug);
 
-	ssp_dbg("[SSP]: %s(%u) - Sensor state: 0x%llx, RC: %u(%u), CC: %u, TC: %u NSC: %u EC: %u\n",
+	ssp_dbg("[SSP]: %s(%u) - Sensor state: 0x%llx, RC: %u(%u, %u), CC: %u, TC: %u NSC: %u EC: %u\n",
 		__func__, data->uIrqCnt, data->uSensorState, data->uResetCnt, data->mcuCrashedCnt,
-		data->uComFailCnt, data->uTimeOutCnt, data->uNoRespSensorCnt, data->errorCount);
+		data->resetCntGPSisOn, data->uComFailCnt, data->uTimeOutCnt, data->uNoRespSensorCnt, data->errorCount);
 
 	for (uSensorCnt = 0; uSensorCnt < SENSOR_MAX; uSensorCnt++)
 		if ((atomic64_read(&data->aSensorEnable) & (1 << uSensorCnt))
 			|| data->batchLatencyBuf[uSensorCnt])
 			print_sensordata(data, uSensorCnt);
 
-    if(data->resetting)
-        goto exit;
+	if (data->resetting)
+		goto exit;
 
 	if (((atomic64_read(&data->aSensorEnable) & (1 << ACCELEROMETER_SENSOR))
-        && (data->batchLatencyBuf[ACCELEROMETER_SENSOR] == 0)
+	&& (data->batchLatencyBuf[ACCELEROMETER_SENSOR] == 0)
 		&& (data->uIrqCnt == 0) && (data->uTimeOutCnt > 0))
 		|| (data->uTimeOutCnt > LIMIT_TIMEOUT_CNT)
 		|| (check_wait_event(data))
@@ -493,10 +499,6 @@ static void debug_work_func(struct work_struct *work)
 				!list_empty(&data->pending_list));
 			reset_mcu(data);
 		mutex_unlock(&data->ssp_enable_mutex);
-
-		data->uTimeOutCnt = 0;
-		data->uComFailCnt = 0;
-		data->mcuAbnormal = false;
 	}
 
 exit:

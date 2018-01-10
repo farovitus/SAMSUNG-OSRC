@@ -25,7 +25,11 @@ struct dpp_device *dpp_drvdata[MAX_DPP_CNT];
 static int dpp_runtime_suspend(struct device *dev);
 static int dpp_runtime_resume(struct device *dev);
 
-static void dpp_check_data_glb_dma(void)
+/* dump_en
+ * 0 = call from dpp_dma_read_ch_data() : print out based on 'checked'
+ * 1 = call from IOCTL ('0' also available) : print out regardless of 'checked'
+ */
+static void dpp_check_data_glb_dma(u32 dump_en)
 {
 	static u32 checked = 0;
 	u32 data[40] = {0,};
@@ -42,8 +46,10 @@ static void dpp_check_data_glb_dma(void)
 		0xc0010001};
 	int i;
 
-	if (checked)
-		return;
+	if (checked) {
+		if (dump_en == 0)
+			return;
+	}
 
 	dpp_info("-< DPU_DMA_DATA >-\n");
 	for (i = 0; i < 40; i++) {
@@ -144,7 +150,7 @@ static void dpp_check_data_wb_ch(int id)
 
 static void dpp_dma_read_ch_data(int id)
 {
-	dpp_check_data_glb_dma();
+	dpp_check_data_glb_dma(0);
 
 	switch (id) {
 	case IDMA_G0:
@@ -171,15 +177,17 @@ static void dpp_dma_read_ch_data(int id)
 	}
 }
 
-static void dpp_dma_dump_registers(struct dpp_device *dpp)
+static void dpp_dma_dump_registers(struct dpp_device *dpp, u32 dump_lv)
 {
 	dma_write(dpp->id, 0x0060, 0x1);
 	if (dpp->id == ODMA_WB) {
-		dpp_info("=== DPU_DMA%d SFR DUMP ===\n", dpp->id);
-		print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
+		if (dump_lv == DPU_DUMP_LV0) {
+			dpp_info("=== DPU_DMA%d SFR DUMP ===\n", dpp->id);
+			print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
 				dpp->res.dma_regs, 0xA0, false);
-		print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
+			print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
 				dpp->res.dma_regs + 0x300, 0x78, false);
+		}
 
 		dpp_info("=== DPU_DMA%d SHADOW SFR DUMP ===\n", dpp->id);
 		print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
@@ -187,9 +195,11 @@ static void dpp_dma_dump_registers(struct dpp_device *dpp)
 		print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
 				dpp->res.dma_regs + 0xB00, 0x78, false);
 	} else {
-		dpp_info("=== DPU_DMA%d SFR DUMP ===\n", dpp->id);
-		print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
+		if (dump_lv == DPU_DUMP_LV0) {
+			dpp_info("=== DPU_DMA%d SFR DUMP ===\n", dpp->id);
+			print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
 				dpp->res.dma_regs, 0x78, false);
+		}
 
 		dpp_info("=== DPU_DMA%d SHADOW SFR DUMP ===\n", dpp->id);
 		print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
@@ -219,32 +229,37 @@ static void dpp_read_ch_data(int id)
 	}
 }
 
-static void dpp_dump_registers(struct dpp_device *dpp)
+static void dpp_dump_registers(struct dpp_device *dpp, u32 dump_lv)
 {
-	dpp_dma_dump_registers(dpp);
+	dpp_dma_dump_registers(dpp, dump_lv);
 
 	dpp_write(dpp->id, 0x0B00, 0x1);
 	dpp_write(dpp->id, 0x0C00, 0x1);
 	dpp_info("=== DPP%d SFR DUMP ===\n", dpp->id);
 
-	print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
+	if (dump_lv == DPU_DUMP_LV0) {
+		print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
 			dpp->res.regs, 0x58, false);
-	if (dpp->id == IDMA_VGF0 || dpp->id == IDMA_VGF1) {
+		if (dpp->id == IDMA_VGF0 || dpp->id == IDMA_VGF1) {
+			print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
+				dpp->res.regs + 0x5B0, 0x10, false);
+			print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
+				dpp->res.regs + 0xA0C, 0x10, false);
+		}
 		print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
-			dpp->res.regs + 0x5B0, 0x10, false);
-		print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
-			dpp->res.regs + 0xA0C, 0x10, false);
-	}
-	print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
 			dpp->res.regs + 0xA54, 0x4, false);
+	}
 	print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
 			dpp->res.regs + 0xB00, 0x58, false);
-	if (dpp->id == IDMA_VGF0 || dpp->id == IDMA_VGF0) {
+
+	if (dump_lv == DPU_DUMP_LV0) {
+		if (dpp->id == IDMA_VGF0 || dpp->id == IDMA_VGF0) {
+			print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
+				dpp->res.regs + 0xBB0, 0x10, false);
+		}
 		print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
-			dpp->res.regs + 0xBB0, 0x10, false);
-	}
-	print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
 			dpp->res.regs + 0xC00, 0x14, false);
+	}
 	print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
 			dpp->res.regs + 0xD00, 0xC, false);
 
@@ -255,7 +270,7 @@ void dpp_op_timer_handler(unsigned long arg)
 {
 	struct dpp_device *dpp = (struct dpp_device *)arg;
 
-	dpp_dump_registers(dpp);
+	dpp_dump_registers(dpp, DPU_DUMP_LV0);
 
 	if (dpp->config->compression)
 		dpp_info("Compression Source is %s of DPP[%d]\n",
@@ -283,7 +298,7 @@ static int dpp_wb_wait_for_framedone(struct dpp_device *dpp)
 	done_cnt = dpp->d.done_count;
 	/* TODO: dma framedone should be wait */
 	ret = wait_event_interruptible_timeout(dpp->framedone_wq,
-			(done_cnt != dpp->d.done_count), msecs_to_jiffies(17));
+			(done_cnt != dpp->d.done_count), msecs_to_jiffies(20));
 	if (ret == 0) {
 		dpp_err("timeout of dpp%d framedone\n", dpp->id);
 		return -ETIMEDOUT;
@@ -300,6 +315,7 @@ static void dpp_get_params(struct dpp_device *dpp, struct dpp_params_info *p)
 	memcpy(&p->src, &config->src, sizeof(struct decon_frame));
 	memcpy(&p->dst, &config->dst, sizeof(struct decon_frame));
 	memcpy(&p->block, &config->block_area, sizeof(struct decon_win_rect));
+	p->plane_alpha = config->plane_alpha;
 	p->flip = config->dpp_parm.flip;
 	p->is_comp = config->compression;
 	p->format = config->format;
@@ -613,10 +629,14 @@ static int dpp_s_stream(struct v4l2_subdev *sd, int enable)
 	return 0;
 }
 
+static int dpp_dump_buffer_data(struct dpp_device *dpp);
+
+
 static long dpp_subdev_ioctl(struct v4l2_subdev *sd, unsigned int cmd, void *arg)
 {
 	struct dpp_device *dpp = v4l2_get_subdevdata(sd);
 	bool reset = (bool)arg;
+	bool en = (bool)arg;
 	unsigned long val;
 	int ret = 0;
 
@@ -634,8 +654,18 @@ static long dpp_subdev_ioctl(struct v4l2_subdev *sd, unsigned int cmd, void *arg
 			dpp_err("failed to stop dpp%d\n", dpp->id);
 		break;
 
+	case DPP_GLOBAL_DMA_DUMP:
+		val = (unsigned long)arg;
+		dpp_check_data_glb_dma((u32)val);
+		break;
+
 	case DPP_DUMP:
-		dpp_dump_registers(dpp);
+		val = (unsigned long)arg;
+		dpp_dump_registers(dpp, (u32)val);
+
+		dpp_info("=== DUMP : Current DMA Buffer :\n");
+		dpp_dump_buffer_data(dpp);
+
 		break;
 
 	case DPP_WB_WAIT_FOR_FRAMEDONE:
@@ -651,6 +681,17 @@ static long dpp_subdev_ioctl(struct v4l2_subdev *sd, unsigned int cmd, void *arg
 	case DPP_SET_RECOVERY_NUM:
 		val = (unsigned long)arg;
 		dma_reg_set_recovery_num(dpp->id, (u32)val);
+		break;
+
+	case DPP_SET_SW_RECOVERY:
+		dma_reg_set_afbc_sw_recovery(dpp->id, (u32)en);
+		dpp_info("dpp%d sw recovery afbc en: %d\n", dpp->id, (u32)en);
+		break;
+
+	case DPP_CLEAR_IRQ:
+		dma_reg_clear_irq_all(dpp->id);
+		dpp_reg_set_irq_clear_all(dpp->id);
+		dpp_dbg("dpp%d clear all interrupts\n", dpp->id);
 		break;
 
 	default:
@@ -696,8 +737,10 @@ static int dpp_dump_buffer_data(struct dpp_device *dpp)
 
 		for (i = 0; i < 3; i++) {
 			decon = get_decon_drvdata(i);
-			if (decon == NULL)
+			if (decon == NULL || decon->id == 2)
 				continue;
+
+			decon->frm_status |= DPU_FRM_SYSMMU_FAULT;
 
 			if (dpp->id == IDMA_VGF1)
 				id_idx = 1;
@@ -711,10 +754,11 @@ static int dpp_dump_buffer_data(struct dpp_device *dpp)
 			else
 				dump_size = afbc_info->size[id_idx] / 16;
 
-			decon_info("Base(0x%p), KV(0x%p), size(%d)\n",
+			dpp_info("Base(0x%p), KV(0x%p), size(%d), sgl(0x%p)\n",
 				(void *)afbc_info->dma_addr[id_idx],
 				afbc_info->v_addr[id_idx],
-				dump_size);
+				afbc_info->size[id_idx],
+				afbc_info->sgl[id_idx]);
 
 			if (!afbc_info->v_addr[id_idx])
 				continue;
@@ -752,7 +796,7 @@ static irqreturn_t dpp_irq_handler(int irq, void *priv)
 		/*
 		 * Disabled because this can cause slow update
 		 * if conditions happen very often
-		 *	dpp_dump_registers(dpp);
+		 *	dpp_dump_registers(dpp, DPU_DUMP_LV0);
 		*/
 		goto irq_end;
 	}
@@ -796,14 +840,14 @@ static irqreturn_t dma_irq_handler(int irq, void *priv)
 			dpp_err("dma%d config error occur(0x%x)\n", dpp->id, irqs);
 			dpp_err("CFG_ERR_STATE = (0x%x)\n", cfg_err);
 			/* TODO: add to read config error information */
-			dpp_dump_registers(dpp);
+			dpp_dump_registers(dpp, DPU_DUMP_LV0);
 			goto irq_end;
 		}
 
 		if ((irqs & ODMA_WRITE_SLAVE_ERROR) ||
 			       (irqs & ODMA_STATUS_DEADLOCK_IRQ)) {
 			dpp_err("dma%d error irq occur(0x%x)\n", dpp->id, irqs);
-			dpp_dump_registers(dpp);
+			dpp_dump_registers(dpp, DPU_DUMP_LV0);
 			goto irq_end;
 		}
 
@@ -830,7 +874,7 @@ static irqreturn_t dma_irq_handler(int irq, void *priv)
 				(irqs & IDMA_READ_SLAVE_ERROR) ||
 				(irqs & IDMA_STATUS_DEADLOCK_IRQ)) {
 			dpp_err("dma%d error irq occur(0x%x)\n", dpp->id, irqs);
-			dpp_dump_registers(dpp);
+			dpp_dump_registers(dpp, DPU_DUMP_LV0);
 			goto irq_end;
 		}
 
@@ -848,7 +892,7 @@ static irqreturn_t dma_irq_handler(int irq, void *priv)
 				/*
 				 * Disabled because this can cause slow update
 				 * if conditions happen very often
-				 *	dpp_dump_registers(dpp);
+				 *	dpp_dump_registers(dpp, DPU_DUMP_LV0);
 				*/
 			}
 			goto irq_end;
@@ -885,7 +929,7 @@ static irqreturn_t dpp_irq_handler(int irq, void *priv)
 	if ((dpp_irq & VG_IRQ_DEADLOCK_STATUS) ||
 			(dpp_irq & VG_IRQ_READ_SLAVE_ERROR)) {
 		dpp_err("dpp%d error irq occur(0x%x)\n", dpp->id, dpp_irq);
-		dpp_dump_registers(dpp);
+		dpp_dump_registers(dpp, DPU_DUMP_LV0);
 		exynos_sysmmu_show_status(dpp->dev);
 		goto irq_end;
 	}
@@ -924,7 +968,7 @@ static int dpp_sysmmu_fault_handler(struct iommu_domain *domain,
 
 	if (dpp->state == DPP_STATE_ON) {
 		dpp_info("dpp%d sysmmu fault handler\n", dpp->id);
-		dpp_dump_registers(dpp);
+		dpp_dump_registers(dpp, DPU_DUMP_LV0);
 
 		dpp_dump_buffer_data(dpp);
 	}

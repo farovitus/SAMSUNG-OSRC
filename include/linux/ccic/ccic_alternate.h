@@ -22,7 +22,6 @@
  */
 #ifndef __LINUX_CCIC_ALTERNATE_MODE_H__
 #define __LINUX_CCIC_ALTERNATE_MODE_H__
-#if defined(CONFIG_CCIC_ALTERNATE_MODE)
 
 typedef union {
 	uint32_t        DATA;
@@ -227,6 +226,7 @@ typedef enum
     num_DFP_D_and_UFP_D_Capable = 3
 }Num_DP_Port_Capability_Type;
 
+#endif
 /* For DP VDM Modes VDO Receptacle_Indication */
 typedef enum
 {
@@ -437,19 +437,3 @@ int send_samsung_unstructured_vdm_message(void * data, const char *buf, size_t s
 void set_enable_alternate_mode(int mode);
 void set_clear_discover_mode(void);
 void set_host_turn_on_event(int mode);
-#else
-inline void send_alternate_message(void *data, int cmd) {}
-inline void receive_alternate_message(void *data, VDM_MSG_IRQ_STATUS_Type *VDM_MSG_IRQ_State) {}
-inline int ccic_register_switch_device(int mode) {}
-inline void acc_detach_check(struct work_struct *work) {}
-inline void send_unstructured_vdm_message(void * data, int cmd) {}
-inline void send_dna_audio_unstructured_vdm_message(void * data, int cmd) {}
-inline void receive_unstructured_vdm_message(void * data, SSM_MSG_IRQ_STATUS_Type *SSM_MSG_IRQ_State) {}
-inline void do_alternate_mode_step_by_step(void * data, int cmd) {}
-inline void send_dex_fan_unstructured_vdm_message(void * data, int cmd) {}
-inline int send_samsung_unstructured_vdm_message(void * data, const char *buf, size_t size) {}
-inline void set_enable_alternate_mode(int mode) {}
-inline void set_clear_discover_mode(void) {}
-inline void set_host_turn_on_event(int mode) {}
-#endif
-#endif

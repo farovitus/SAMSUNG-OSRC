@@ -492,7 +492,7 @@ late_initcall(sec_last_kmsg_late_init);
 #endif /* CONFIG_SEC_DEBUG_LAST_KMSG */
 
 #ifdef CONFIG_SEC_DEBUG_FILE_LEAK
-void sec_debug_print_file_list(void)
+int sec_debug_print_file_list(void)
 {
 	int i = 0;
 	unsigned int count = 0;
@@ -500,6 +500,7 @@ void sec_debug_print_file_list(void)
 	struct files_struct *files = current->files;
 	const char *p_rootname = NULL;
 	const char *p_filename = NULL;
+	int ret = 0;
 
 	count = files->fdt->max_fds;
 
@@ -523,9 +524,15 @@ void sec_debug_print_file_list(void)
 
 			pr_err("[%04d]%s%s\n", i, p_rootname ? p_rootname : "null",
 			       p_filename ? p_filename : "null");
+			ret++;
 		}
 		rcu_read_unlock();
 	}
+
+	if(ret > count - 50)
+		return 1;
+	else
+		return 0;
 }
 
 void sec_debug_EMFILE_error_proc(unsigned long files_addr)
@@ -550,8 +557,9 @@ void sec_debug_EMFILE_error_proc(unsigned long files_addr)
 	if (!strcmp(current->group_leader->comm, "system_server") ||
 	    !strcmp(current->group_leader->comm, "mediaserver") ||
 	    !strcmp(current->group_leader->comm, "surfaceflinger")) {
-		sec_debug_print_file_list();
-		panic("Too many open files");
+		if (sec_debug_print_file_list() == 1) {
+			panic("Too many open files");
+		}
 	}
 }
 #endif /* CONFIG_SEC_DEBUG_FILE_LEAK */

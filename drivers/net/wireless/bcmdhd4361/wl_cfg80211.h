@@ -906,6 +906,7 @@ struct bcm_cfg80211 {
 	struct list_head wbtext_bssid_list;
 #endif /* WBTEXT */
 	struct list_head vndr_oui_list;
+	spinlock_t vndr_oui_sync;	/* to protect vndr_oui_list */
 
 #ifdef STAT_REPORT
 	void *stat_report_info;

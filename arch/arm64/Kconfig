@@ -658,13 +658,13 @@ config TIMA_LKMAUTH
 	  want TIMA enabled.
 
 config TIMA_RKP
-	depends on TIMA
 	default n
 	bool "Samsung KNOX realtime kernel protection depends on TIMA"
 	help
 	  this enables realtime kernel protection
 
 config TIMA_RKP_DEBUG
+	depends on !SEC_FACTORY
 	depends on TIMA_RKP
 	default n
 	bool "Support SS Sentinel for debugging"
@@ -673,6 +673,7 @@ config TIMA_RKP_DEBUG
 
 config RKP_KDP
 	bool "Protection for cred structure"
+	depends on !SEC_FACTORY
 	depends on TIMA_RKP
 	default n
 	help
@@ -680,6 +681,7 @@ config RKP_KDP
 
 config RKP_NS_PROT
 	bool "Protection for namespace structure"
+	depends on !SEC_FACTORY
 	depends on RKP_KDP
 	default n
 	help
@@ -687,6 +689,7 @@ config RKP_NS_PROT
 
 config RKP_DMAP_PROT
 	bool "Page Double Mapping protection"
+	depends on !SEC_FACTORY
 	depends on RKP_KDP
 	default n
 	help

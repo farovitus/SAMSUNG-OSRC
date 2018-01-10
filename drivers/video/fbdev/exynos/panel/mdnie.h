@@ -174,6 +174,8 @@ enum HDR {
 	HDR_1 = HDR_ON,
 	HDR_2,
 	HDR_3,
+	HDR_4,
+	HDR_5,
 	HDR_MAX
 };
 
@@ -319,6 +321,12 @@ enum {
 	MAX_QUAD,
 };
 
+struct cal_center {
+	int x;
+	int y;
+	int thres;
+};
+
 struct cal_line {
 	int num;
 	int den;
@@ -339,8 +347,12 @@ struct mdnie_tune {
 	u32 nr_scr_white_maptbl;
 	struct maptbl *etc_maptbl;
 	u32 nr_etc_maptbl;
+	struct cal_center center;
 	struct cal_line line[MAX_CAL_LINE];
 	struct cal_coef coef[MAX_QUAD];
+	u32 cal_x_center;
+	u32 cal_y_center;
+	u32 cal_boundary_center;
 	u8 vtx[MAX_WCRD_TYPE][MAX_CCRD_PT][MAX_COLOR];
 	u32 num_ldu_mode;
 	u32 num_night_level;
@@ -382,6 +394,9 @@ struct mdnie_properties {
 	u32 num_night_level;
 	struct cal_line line[MAX_CAL_LINE];
 	struct cal_coef coef[MAX_QUAD];
+	u32 cal_x_center;
+	u32 cal_y_center;
+	u32 cal_boundary_center;
 	u8 vtx[MAX_WCRD_TYPE][MAX_CCRD_PT][MAX_COLOR];
 
 	/* support */

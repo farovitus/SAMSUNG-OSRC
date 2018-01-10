@@ -203,3 +203,6 @@ obj-y                           += motor/
 
 # CCIC
 obj-y	+= ccic/
+
+# Gator for ARM DS5 tool
+obj-$(CONFIG_GATOR)	+= gator_5.26/
