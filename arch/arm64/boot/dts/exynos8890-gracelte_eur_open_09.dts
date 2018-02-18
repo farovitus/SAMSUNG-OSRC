@@ -1,8 +1,8 @@
-# 1 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_11.dts"
+# 1 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_09.dts"
 # 1 "<built-in>"
 # 1 "<command-line>"
-# 1 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_11.dts"
-# 12 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_11.dts"
+# 1 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_09.dts"
+# 12 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_09.dts"
 /dts-v1/;
 # 1 "arch/arm64/boot/dts/exynos8890-gracelte_common.dtsi" 1
 # 12 "arch/arm64/boot/dts/exynos8890-gracelte_common.dtsi"
@@ -8560,11 +8560,11 @@
   };
  };
 };
-# 14 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_11.dts" 2
-# 1 "arch/arm64/boot/dts/exynos8890-grace_gpio_03.dtsi" 1
-# 12 "arch/arm64/boot/dts/exynos8890-grace_gpio_03.dtsi"
+# 14 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_09.dts" 2
+# 1 "arch/arm64/boot/dts/exynos8890-grace_gpio_02.dtsi" 1
+# 12 "arch/arm64/boot/dts/exynos8890-grace_gpio_02.dtsi"
 # 1 "arch/arm64/boot/dts/exynos_gpio_config_macros.dtsi" 1
-# 13 "arch/arm64/boot/dts/exynos8890-grace_gpio_03.dtsi" 2
+# 13 "arch/arm64/boot/dts/exynos8890-grace_gpio_02.dtsi" 2
 
 
 &pinctrl_0 {
@@ -8572,10 +8572,10 @@
  pinctrl-0 = <&initial0>;
  pinctrl-1 = <&sleep0>;
  initial0: initial-state {
-  gpa3-0 { samsung,pins = "gpa3-0"; samsung,pin-function = <0>; samsung,pin-pud = <1>; samsung,pin-drv = <0x0>; };
+  gpa3-0 { samsung,pins = "gpa3-0"; samsung,pin-function = <0>; samsung,pin-pud = <0>; samsung,pin-drv = <0x0>; };
  };
  sleep0:sleep-state {
-  gpa3-0 { samsung,pins = "gpa3-0"; samsung,pin-con-pdn = <2>; samsung,pin-pud-pdn = <1>; };
+  gpa3-0 { samsung,pins = "gpa3-0"; samsung,pin-con-pdn = <2>; samsung,pin-pud-pdn = <3>; };
  };
 };
 
@@ -8929,7 +8929,7 @@
   gpf1-2 { samsung,pins = "gpf1-2"; samsung,pin-con-pdn = <0>; samsung,pin-pud-pdn = <1>; };
  };
 };
-# 15 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_11.dts" 2
+# 15 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_09.dts" 2
 # 1 "arch/arm64/boot/dts/exynos8890-gracelte_battery_eur_02.dtsi" 1
 # 12 "arch/arm64/boot/dts/exynos8890-gracelte_battery_eur_02.dtsi"
 # 1 "arch/arm64/boot/dts/exynos8890-gracelte_common_battery.dtsi" 1
@@ -9340,7 +9340,7 @@
   fuelgauge,fg_resistor = <2>;
  };
 };
-# 16 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_11.dts" 2
+# 16 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_09.dts" 2
 # 1 "arch/arm64/boot/dts/exynos8890-sound-cs47l91.dtsi" 1
 # 12 "arch/arm64/boot/dts/exynos8890-sound-cs47l91.dtsi"
 / {
@@ -9577,7 +9577,7 @@
  };
 
 };
-# 17 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_11.dts" 2
+# 17 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_09.dts" 2
 # 1 "arch/arm64/boot/dts/exynos8890-gracelte-sound-cs47l91.dtsi" 1
 # 12 "arch/arm64/boot/dts/exynos8890-gracelte-sound-cs47l91.dtsi"
 / {
@@ -9601,7 +9601,7 @@
   };
  };
 };
-# 18 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_11.dts" 2
+# 18 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_09.dts" 2
 # 1 "arch/arm64/boot/dts/exynos8890-luckylte_mst.dtsi" 1
 # 13 "arch/arm64/boot/dts/exynos8890-luckylte_mst.dtsi"
 / {
@@ -9644,7 +9644,7 @@
   };
  };
 };
-# 19 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_11.dts" 2
+# 19 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_09.dts" 2
 # 1 "arch/arm64/boot/dts/exynos8890-gracelte_fingerprint-sensor_08.dtsi" 1
 # 14 "arch/arm64/boot/dts/exynos8890-gracelte_fingerprint-sensor_08.dtsi"
 / {
@@ -9767,7 +9767,7 @@
   };
  };
 };
-# 20 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_11.dts" 2
+# 20 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_09.dts" 2
 # 1 "arch/arm64/boot/dts/exynos8890-grace_display_01.dtsi" 1
 # 12 "arch/arm64/boot/dts/exynos8890-grace_display_01.dtsi"
 / {
@@ -9795,7 +9795,7 @@
   regulator_16V = "vdd_1p6_ddr";
  };
 };
-# 21 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_11.dts" 2
+# 21 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_09.dts" 2
 # 1 "arch/arm64/boot/dts/exynos8890-gracelte_motor.dtsi" 1
 # 12 "arch/arm64/boot/dts/exynos8890-gracelte_motor.dtsi"
 / {
@@ -9814,7 +9814,7 @@
   haptic,regulator_name = "VDD_MOT_3.3V";
  };
 };
-# 22 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_11.dts" 2
+# 22 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_09.dts" 2
 # 1 "arch/arm64/boot/dts/exynos8890-gracelte_svcled.dtsi" 1
 # 12 "arch/arm64/boot/dts/exynos8890-gracelte_svcled.dtsi"
 / {
@@ -9886,7 +9886,7 @@
   br_ratio_b_low_pg = <40>;
  };
 };
-# 23 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_11.dts" 2
+# 23 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_09.dts" 2
 # 1 "arch/arm64/boot/dts/exynos8890-gracelte-ccic-s2mm005_00.dtsi" 1
 # 12 "arch/arm64/boot/dts/exynos8890-gracelte-ccic-s2mm005_00.dtsi"
 / {
@@ -9960,15 +9960,15 @@
   gpios_redriver_en = <&gpe4 2 0>;
  };
 };
-# 24 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_11.dts" 2
+# 24 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_09.dts" 2
 
 / {
  model = "Samsung UNIVERSAL8890 board based on EXYNOS8890";
  model_info-chip = <8890>;
  model_info-platform = "android";
  model_info-subtype = "samsung";
- model_info-hw_rev = <11>;
- model_info-hw_rev_end = <255>;
+ model_info-hw_rev = <9>;
+ model_info-hw_rev_end = <10>;
  compatible = "samsung,exynos8890", "samsung,UNIVERSAL8890";
 
  audio_pdata {

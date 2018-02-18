@@ -1,8 +1,8 @@
-# 1 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_11.dts"
+# 1 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_02.dts"
 # 1 "<built-in>"
 # 1 "<command-line>"
-# 1 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_11.dts"
-# 12 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_11.dts"
+# 1 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_02.dts"
+# 12 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_02.dts"
 /dts-v1/;
 # 1 "arch/arm64/boot/dts/exynos8890-gracelte_common.dtsi" 1
 # 12 "arch/arm64/boot/dts/exynos8890-gracelte_common.dtsi"
@@ -8560,11 +8560,11 @@
   };
  };
 };
-# 14 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_11.dts" 2
-# 1 "arch/arm64/boot/dts/exynos8890-grace_gpio_03.dtsi" 1
-# 12 "arch/arm64/boot/dts/exynos8890-grace_gpio_03.dtsi"
+# 14 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_02.dts" 2
+# 1 "arch/arm64/boot/dts/exynos8890-grace_gpio_00.dtsi" 1
+# 12 "arch/arm64/boot/dts/exynos8890-grace_gpio_00.dtsi"
 # 1 "arch/arm64/boot/dts/exynos_gpio_config_macros.dtsi" 1
-# 13 "arch/arm64/boot/dts/exynos8890-grace_gpio_03.dtsi" 2
+# 13 "arch/arm64/boot/dts/exynos8890-grace_gpio_00.dtsi" 2
 
 
 &pinctrl_0 {
@@ -8572,10 +8572,10 @@
  pinctrl-0 = <&initial0>;
  pinctrl-1 = <&sleep0>;
  initial0: initial-state {
-  gpa3-0 { samsung,pins = "gpa3-0"; samsung,pin-function = <0>; samsung,pin-pud = <1>; samsung,pin-drv = <0x0>; };
+  gpa3-0 { samsung,pins = "gpa3-0"; samsung,pin-function = <0>; samsung,pin-pud = <0>; samsung,pin-drv = <0x0>; };
  };
  sleep0:sleep-state {
-  gpa3-0 { samsung,pins = "gpa3-0"; samsung,pin-con-pdn = <2>; samsung,pin-pud-pdn = <1>; };
+  gpa3-0 { samsung,pins = "gpa3-0"; samsung,pin-con-pdn = <2>; samsung,pin-pud-pdn = <3>; };
  };
 };
 
@@ -8614,7 +8614,7 @@
  };
  sleep3: sleep-state {
   gpf3-0 { samsung,pins = "gpf3-0"; samsung,pin-con-pdn = <0>; samsung,pin-pud-pdn = <0>; };
-  gpf3-1 { samsung,pins = "gpf3-1"; samsung,pin-con-pdn = <1>; samsung,pin-pud-pdn = <0>; };
+  gpf3-1 { samsung,pins = "gpf3-1"; samsung,pin-con-pdn = <0>; samsung,pin-pud-pdn = <0>; };
   gpf3-2 { samsung,pins = "gpf3-2"; samsung,pin-con-pdn = <2>; samsung,pin-pud-pdn = <1>; };
   gpf3-3 { samsung,pins = "gpf3-3"; samsung,pin-con-pdn = <0>; samsung,pin-pud-pdn = <0>; };
   gpf3-4 { samsung,pins = "gpf3-4"; samsung,pin-con-pdn = <2>; samsung,pin-pud-pdn = <1>; };
@@ -8806,6 +8806,7 @@
   gpe1-6 { samsung,pins = "gpe1-6"; samsung,pin-function = <0>; samsung,pin-pud = <1>; samsung,pin-drv = <0x0>; };
   gpe1-7 { samsung,pins = "gpe1-7"; samsung,pin-function = <0>; samsung,pin-pud = <1>; samsung,pin-drv = <0x0>; };
 
+  gpe3-1 { samsung,pins = "gpe3-1"; samsung,pin-function = <0>; samsung,pin-pud = <1>; samsung,pin-drv = <0x0>; };
   gpe3-4 { samsung,pins = "gpe3-4"; samsung,pin-function = <0>; samsung,pin-pud = <1>; samsung,pin-drv = <0x0>; };
   gpe3-5 { samsung,pins = "gpe3-5"; samsung,pin-function = <0>; samsung,pin-pud = <1>; samsung,pin-drv = <0x0>; };
   gpe3-6 { samsung,pins = "gpe3-6"; samsung,pin-function = <0>; samsung,pin-pud = <1>; samsung,pin-drv = <0x0>; };
@@ -8844,7 +8845,7 @@
   gpe1-2 { samsung,pins = "gpe1-2"; samsung,pin-con-pdn = <2>; samsung,pin-pud-pdn = <1>; };
   gpe1-3 { samsung,pins = "gpe1-3"; samsung,pin-con-pdn = <2>; samsung,pin-pud-pdn = <1>; };
   gpe1-4 { samsung,pins = "gpe1-4"; samsung,pin-con-pdn = <2>; samsung,pin-pud-pdn = <1>; };
-  gpe1-5 { samsung,pins = "gpe1-5"; samsung,pin-con-pdn = <2>; samsung,pin-pud-pdn = <1>; };
+  gpe1-5 { samsung,pins = "gpe1-5"; samsung,pin-con-pdn = <0>; samsung,pin-pud-pdn = <1>; };
   gpe1-6 { samsung,pins = "gpe1-6"; samsung,pin-con-pdn = <2>; samsung,pin-pud-pdn = <1>; };
   gpe1-7 { samsung,pins = "gpe1-7"; samsung,pin-con-pdn = <2>; samsung,pin-pud-pdn = <1>; };
 
@@ -8858,6 +8859,7 @@
   gpe2-7 { samsung,pins = "gpe2-7"; samsung,pin-con-pdn = <1>; samsung,pin-pud-pdn = <3>; };
 
   gpe3-0 { samsung,pins = "gpe3-0"; samsung,pin-con-pdn = <3>; samsung,pin-pud-pdn = <0>; };
+  gpe3-1 { samsung,pins = "gpe3-1"; samsung,pin-con-pdn = <2>; samsung,pin-pud-pdn = <1>; };
   gpe3-2 { samsung,pins = "gpe3-2"; samsung,pin-con-pdn = <3>; samsung,pin-pud-pdn = <1>; };
   gpe3-3 { samsung,pins = "gpe3-3"; samsung,pin-con-pdn = <2>; samsung,pin-pud-pdn = <1>; };
   gpe3-4 { samsung,pins = "gpe3-4"; samsung,pin-con-pdn = <2>; samsung,pin-pud-pdn = <1>; };
@@ -8868,7 +8870,7 @@
   gpe4-0 { samsung,pins = "gpe4-0"; samsung,pin-con-pdn = <2>; samsung,pin-pud-pdn = <1>; };
   gpe4-1 { samsung,pins = "gpe4-1"; samsung,pin-con-pdn = <2>; samsung,pin-pud-pdn = <1>; };
   gpe4-2 { samsung,pins = "gpe4-2"; samsung,pin-con-pdn = <0>; samsung,pin-pud-pdn = <1>; };
-  gpe4-3 { samsung,pins = "gpe4-3"; samsung,pin-con-pdn = <3>; samsung,pin-pud-pdn = <0>; };
+  gpe4-3 { samsung,pins = "gpe4-3"; samsung,pin-con-pdn = <2>; samsung,pin-pud-pdn = <1>; };
   gpe4-4 { samsung,pins = "gpe4-4"; samsung,pin-con-pdn = <2>; samsung,pin-pud-pdn = <0>; };
   gpe4-5 { samsung,pins = "gpe4-5"; samsung,pin-con-pdn = <2>; samsung,pin-pud-pdn = <0>; };
   gpe4-6 { samsung,pins = "gpe4-6"; samsung,pin-con-pdn = <2>; samsung,pin-pud-pdn = <0>; };
@@ -8894,7 +8896,7 @@
 
   gpe7-0 { samsung,pins = "gpe7-0"; samsung,pin-con-pdn = <0>; samsung,pin-pud-pdn = <1>; };
   gpe7-1 { samsung,pins = "gpe7-1"; samsung,pin-con-pdn = <2>; samsung,pin-pud-pdn = <0>; };
-  gpe7-2 { samsung,pins = "gpe7-2"; samsung,pin-con-pdn = <0>; samsung,pin-pud-pdn = <1>; };
+  gpe7-2 { samsung,pins = "gpe7-2"; samsung,pin-con-pdn = <2>; samsung,pin-pud-pdn = <1>; };
   gpe7-3 { samsung,pins = "gpe7-3"; samsung,pin-con-pdn = <2>; samsung,pin-pud-pdn = <1>; };
 
   gpj1-0 { samsung,pins = "gpj1-0"; samsung,pin-con-pdn = <2>; samsung,pin-pud-pdn = <0>; };
@@ -8929,7 +8931,7 @@
   gpf1-2 { samsung,pins = "gpf1-2"; samsung,pin-con-pdn = <0>; samsung,pin-pud-pdn = <1>; };
  };
 };
-# 15 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_11.dts" 2
+# 15 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_02.dts" 2
 # 1 "arch/arm64/boot/dts/exynos8890-gracelte_battery_eur_02.dtsi" 1
 # 12 "arch/arm64/boot/dts/exynos8890-gracelte_battery_eur_02.dtsi"
 # 1 "arch/arm64/boot/dts/exynos8890-gracelte_common_battery.dtsi" 1
@@ -9340,7 +9342,7 @@
   fuelgauge,fg_resistor = <2>;
  };
 };
-# 16 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_11.dts" 2
+# 16 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_02.dts" 2
 # 1 "arch/arm64/boot/dts/exynos8890-sound-cs47l91.dtsi" 1
 # 12 "arch/arm64/boot/dts/exynos8890-sound-cs47l91.dtsi"
 / {
@@ -9577,7 +9579,7 @@
  };
 
 };
-# 17 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_11.dts" 2
+# 17 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_02.dts" 2
 # 1 "arch/arm64/boot/dts/exynos8890-gracelte-sound-cs47l91.dtsi" 1
 # 12 "arch/arm64/boot/dts/exynos8890-gracelte-sound-cs47l91.dtsi"
 / {
@@ -9601,7 +9603,7 @@
   };
  };
 };
-# 18 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_11.dts" 2
+# 18 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_02.dts" 2
 # 1 "arch/arm64/boot/dts/exynos8890-luckylte_mst.dtsi" 1
 # 13 "arch/arm64/boot/dts/exynos8890-luckylte_mst.dtsi"
 / {
@@ -9644,9 +9646,9 @@
   };
  };
 };
-# 19 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_11.dts" 2
-# 1 "arch/arm64/boot/dts/exynos8890-gracelte_fingerprint-sensor_08.dtsi" 1
-# 14 "arch/arm64/boot/dts/exynos8890-gracelte_fingerprint-sensor_08.dtsi"
+# 19 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_02.dts" 2
+# 1 "arch/arm64/boot/dts/exynos8890-gracelte_fingerprint-sensor_00.dtsi" 1
+# 14 "arch/arm64/boot/dts/exynos8890-gracelte_fingerprint-sensor_00.dtsi"
 / {
  pinctrl@10580000 {
   btp_irq: btp-irq {
@@ -9678,12 +9680,6 @@
   btp_check: btp-check {
    samsung,pins = "gpe3-2";
    samsung,pin-function = <0>;
-   samsung,pin-pud = <0>;
-   samsung,pin-drv = <3>;
-  };
-  btp_gpio: btp-gpio {
-   samsung,pins = "gpe4-3";
-   samsung,pin-function = <1>;
    samsung,pin-pud = <0>;
    samsung,pin-drv = <3>;
   };
@@ -9723,7 +9719,7 @@
    reg = <0>;
    spi-max-frequency = <19200000>;
    pinctrl-names = "default", "sleep", "idle";
-   pinctrl-0 = <&btp_irq &btp_reset &btp_ldo &btp_check &btp_gpio>;
+   pinctrl-0 = <&btp_irq &btp_reset &btp_ldo &btp_check>;
    pinctrl-1 = <&btp_irqsleep>;
    pinctrl-2 = <&btp_irqidle>;
 
@@ -9735,7 +9731,6 @@
    vfsspi-ldoPin = <&gpe3 0 0x00>;
    vfsspi-orient = <0>;
    vfsspi-vendorPin = <&gpe3 2 0x00>;
-   vfsspi-retainPin = <&gpe4 3 0x00>;
    vfsspi-ldocontrol = <1>;
    vfsspi-csgpio = <&gpf3 1 0>;
    controller-data {
@@ -9767,7 +9762,7 @@
   };
  };
 };
-# 20 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_11.dts" 2
+# 20 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_02.dts" 2
 # 1 "arch/arm64/boot/dts/exynos8890-grace_display_01.dtsi" 1
 # 12 "arch/arm64/boot/dts/exynos8890-grace_display_01.dtsi"
 / {
@@ -9795,7 +9790,7 @@
   regulator_16V = "vdd_1p6_ddr";
  };
 };
-# 21 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_11.dts" 2
+# 21 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_02.dts" 2
 # 1 "arch/arm64/boot/dts/exynos8890-gracelte_motor.dtsi" 1
 # 12 "arch/arm64/boot/dts/exynos8890-gracelte_motor.dtsi"
 / {
@@ -9814,7 +9809,7 @@
   haptic,regulator_name = "VDD_MOT_3.3V";
  };
 };
-# 22 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_11.dts" 2
+# 22 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_02.dts" 2
 # 1 "arch/arm64/boot/dts/exynos8890-gracelte_svcled.dtsi" 1
 # 12 "arch/arm64/boot/dts/exynos8890-gracelte_svcled.dtsi"
 / {
@@ -9886,9 +9881,9 @@
   br_ratio_b_low_pg = <40>;
  };
 };
-# 23 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_11.dts" 2
-# 1 "arch/arm64/boot/dts/exynos8890-gracelte-ccic-s2mm005_00.dtsi" 1
-# 12 "arch/arm64/boot/dts/exynos8890-gracelte-ccic-s2mm005_00.dtsi"
+# 23 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_02.dts" 2
+# 1 "arch/arm64/boot/dts/exynos8890-ccic-s2mm003_00.dtsi" 1
+# 12 "arch/arm64/boot/dts/exynos8890-ccic-s2mm003_00.dtsi"
 / {
  pinctrl@10580000 {
   usbpd_irq: usbpd-irq {
@@ -9898,55 +9893,21 @@
    samsung,pin-drv = <0>;
   };
  };
-
- pinctrl@14CC0000 {
-  hard_reset: scl_sda_low {
-   samsung,pins = "gpe6-3", "gpe6-2";
-   samsung,pin-function = <1>;
-   samsung,pin-pud = <0>;
-   samsung,pin-val = <0>;
-   samsung,pin-drv = <0>;
-  };
-  om_high: om_high {
-   samsung,pins = "gpe3-1";
-   samsung,pin-function = <1>;
-   samsung,pin-pud = <3>;
-   samsung,pin-val = <1>;
-   samsung,pin-drv = <3>;
-  };
-  om_input: om_input {
-   samsung,pins = "gpe3-1";
-   samsung,pin-function = <0>;
-   samsung,pin-pud = <1>;
-   samsung,pin-drv = <3>;
-  };
- };
-
  hsi2c@14E50000 {
   status = "okay";
-  pinctrl-names = "default","hard_reset","om_high","om_input";
-  pinctrl-0 = <&hs_i2c14_bus>;
-  pinctrl-1 = <&hard_reset>;
-  pinctrl-2 = <&om_high>;
-  pinctrl-3 = <&om_input>;
-  clock-frequency = <100000>;
+  gpio_sda= <&gpe6 2 0x1>;
+  gpio_scl= <&gpe6 3 0x1>;
 
 
 
-
-  usbpd-s2mm005@33 {
-   compatible = "sec-s2mm005,i2c";
-   reg = <0x33>;
+  usbpd-s2mm003@3B {
+   compatible = "sec-s2mm003,i2c";
+   reg = <0x3B>;
    pinctrl-names = "default";
    pinctrl-0 = <&usbpd_irq>;
    interrupt-parent = <&gpa1>;
    usbpd,usbpd_int = <&gpa1 7 0>;
-
-   usbpd,s2mm005_om = <&gpe3 1 0>;
-   usbpd,s2mm005_sda = <&gpe6 2 1>;
-   usbpd,s2mm005_scl = <&gpe6 3 1>;
-   usbpd,run_dry_support = <1>;
-   usbpd,booting_dry_support = <1>;
+   usbpd,redriver_en = <&gpe4 2 0>;
   };
  };
 
@@ -9955,20 +9916,16 @@
    maximum-speed = "super-speed";
   };
  };
-
- usb_notifier {
-  gpios_redriver_en = <&gpe4 2 0>;
- };
 };
-# 24 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_11.dts" 2
+# 24 "arch/arm64/boot/dts/exynos8890-gracelte_eur_open_02.dts" 2
 
 / {
  model = "Samsung UNIVERSAL8890 board based on EXYNOS8890";
  model_info-chip = <8890>;
  model_info-platform = "android";
  model_info-subtype = "samsung";
- model_info-hw_rev = <11>;
- model_info-hw_rev_end = <255>;
+ model_info-hw_rev = <2>;
+ model_info-hw_rev_end = <2>;
  compatible = "samsung,exynos8890", "samsung,UNIVERSAL8890";
 
  audio_pdata {
@@ -10018,8 +9975,8 @@
 
   hrm_irqsleep: hrm-irqsleep {
    samsung,pins = "gpi2-5";
-   samsung,pin-function = <0>;
-   samsung,pin-pud = <1>;
+   samsung,pin-function = <0xf>;
+   samsung,pin-pud = <0>;
    samsung,pin-drv = <3>;
   };
 
@@ -10171,20 +10128,23 @@
    ssp-mcu-resp = <&gpg0 2 0x00>;
    ssp-batch-wake-irq = <&gpa3 1 0x00>;
    ssp-acc-position = <5>;
-   ssp-mag-position = <3>;
+   ssp-mag-position = <1>;
    ssp-sns-combination = <0>;
    ssp-ap-rev = <1>;
-   ssp-mag-array = /bits/ 8 <190 85 243 174 49 153 253 103 205 55
-      250 81 204 149 255 93 253 89 188 154
-      185 255 194 57 10 85 126>;
+   ssp-mag-array = <10700 440 130 440 8730 380 130 380 10570>;
    ssp-glass-type = <0>;
-   ssp-mag-type = <1>;
 
    controller-data {
     cs-gpio = <&gpe2 5 0>;
     samsung,spi-feedback-delay = <0>;
     };
    };
+ };
+
+ hsi2c@14E10000 {
+  touchscreen@48{
+   sec,project_name = "HERO2", "G935";
+  };
  };
 
  gps {
@@ -10232,31 +10192,9 @@
   };
  };
 
- hsi2c@14E10000 {
-  touchscreen@48{
-   sec,firmware_name = "tsp_sec/y661_grace.fw";
-   sec,mis_cal_check = <1>;
-   sec,grip_concept = <2>;
+ hsi2c@14E00000 {
+  fimc-is-secure@10 {
+   /delete-property/ gpio_iris_led_en;
   };
- };
-
- wacom_fwe_en {
-  compatible = "regulator-fixed";
-  regulator-name = "wacom_fwe_1.8v";
-  regulator-min-microvolt = <1800000>;
-  regulator-max-microvolt = <1800000>;
-  gpio = <&gpe7 2 0>;
-  enable-active-high;
- };
-
- hsi2c@13660000 {
-  wacom@56 {
-   wacom,fwe-gpio = <&gpe7 2 0>;
-  };
- };
-
- cpufreq {
-
-  cpufreq,jig_on = <&gpi2 4 0>;
  };
 };

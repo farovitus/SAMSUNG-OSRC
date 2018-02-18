@@ -192,8 +192,8 @@ static u32 _teec_setup_operation(struct teec_session_imp *session,
 				      TEEC_MEM_INPUT) &&
 				      (param_type ==
 				      TEEC_MEMREF_PARTIAL_OUTPUT)) ||
-				    (((ext->memref.parent->
-				       flags & TEEC_MEM_INOUT) ==
+				    (((ext->memref.parent->flags
+				       & TEEC_MEM_INOUT) ==
 				      TEEC_MEM_OUTPUT) &&
 				     (param_type ==
 					 TEEC_MEMREF_PARTIAL_INPUT))) {

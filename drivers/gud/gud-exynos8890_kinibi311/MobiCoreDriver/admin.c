@@ -25,16 +25,6 @@
 #include <linux/module.h>
 #include <linux/random.h>
 #include <linux/delay.h>
-#include "platform.h"		/* MC_NO_UIDGIT_H */
-#ifndef MC_NO_UIDGIT_H
-#include <linux/uidgid.h>
-#else /* !MC_NO_UIDGIT_H */
-#define kuid_t uid_t
-static inline uid_t __kuid_val(kuid_t uid)
-{
-	return uid;
-}
-#endif /* MC_NO_UIDGIT_H */
 
 #include "public/mc_user.h"
 #include "public/mc_admin.h"
@@ -99,6 +89,12 @@ static struct tee_object *tee_object_alloc(bool is_sp_trustlet, size_t length)
 		/* Need space for lengths info and containers */
 		header_length = sizeof(struct mc_blob_len_info);
 		size += header_length + 3 * MAX_SO_CONT_SIZE;
+	}
+
+	/* Check size for overflow */
+	if (size < length) {
+		mc_dev_err("cannot allocate object of size %zu", length);
+		return NULL;
 	}
 
 	/* Allocate memory */
